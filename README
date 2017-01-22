@@ -1,11 +1,15 @@
 CS130 Project - Web Server
-=============================================================================
+====================================================================================================
 
-Current code is a demo example from the getting started page at:
-http://www.boost.org/doc/libs/1_61_0/more/getting_started/unix-variants.html
+Current code is a synchronous day/time server example from the getting started page at:
+http://www.boost.org/doc/libs/1_63_0/doc/html/boost_asio/tutorial.html#boost_asio.tutorial.tuttimer1
 
-Uses boost regex library to test out the linking process. Invoke with:
-$ ./webserver < jayne.txt
+Run server using:
+$ sudo ./webserver
 
-Works only for my local machine. My library binaries are installed in a 
-pretty wonky spot too so the Makefile paths need to be changed in the future.
+Run client uising:
+$ ./client
+
+Server returns the current date and time to client.
+
+NOTE: Works only for my local machine.
