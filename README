@@ -1,6 +1,11 @@
 CS130 Project - Web Server
-=========================================================
+=============================================================================
 
 Current code is a demo example from the getting started page at:
 http://www.boost.org/doc/libs/1_61_0/more/getting_started/unix-variants.html
 
+Uses boost regex library to test out the linking process. Invoke with:
+$ ./webserver < jayne.txt
+
+Works only for my local machine. My library binaries are installed in a 
+pretty wonky spot too so the Makefile paths need to be changed in the future.
