@@ -1,15 +1,21 @@
 CS130 Project - Web Server
-====================================================================================================
+===========================================================================================
 
-Current code is a synchronous day/time server example from the getting started page at:
-http://www.boost.org/doc/libs/1_63_0/doc/html/boost_asio/tutorial.html#boost_asio.tutorial.tuttimer1
+A full HTTP web server, from the boost documentation:
+http://www.boost.org/doc/libs/1_53_0/doc/html/boost_asio/examples.html
 
 Run server using:
-$ sudo ./webserver
+$ sudo ./webserver 0.0.0.0 80 .
 
-Run client uising:
-$ ./client
+Client is browser. Request default.html for an awesome webpage with some really cool text.
 
-Server returns the current date and time to client.
+===========================================================================================
+
+TODO: 
+-Change the implementation of the server to return the user's request, rather than
+	parsing it and returning the requested page.
+-Integrate nginx-configparser.
+
+===========================================================================================
 
 NOTE: Works only for my local machine.
