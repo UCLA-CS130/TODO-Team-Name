@@ -22,6 +22,18 @@ Client is browser. Request `default.html` for an awesome webpage with some reall
 parsing it and returning the requested page.
 * Integrate nginx-configparser.
 
+
+###Dealing with bound ports
+If when running the server you get an error that the port is already bound,
+execute the following (change 8080 to whatever port number you're using):
+```
+sudo lsof -i:8080
+```
+Then find the PID of the process associated with the server and kill it:
+```
+sudo kill -9 <pid>
+```
+
 ***
 
 NOTE: Works only for my local machine.

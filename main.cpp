@@ -13,24 +13,47 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "server.hpp"
+#include "nginx-configparser/config_parser.h"
 
 int main(int argc, char* argv[])
 {
   try
   {
     // Check command line arguments.
-    if (argc != 4)
+    if (argc != 2)
     {
-      std::cerr << "Usage: http_server <address> <port> <doc_root>\n";
-      std::cerr << "  For IPv4, try:\n";
-      std::cerr << "    receiver 0.0.0.0 80 .\n";
-      std::cerr << "  For IPv6, try:\n";
-      std::cerr << "    receiver 0::0 80 .\n";
+      std::cerr << "Usage: ./webserver <config_file>\n";
       return 1;
     }
 
+    // Parse the config file.
+    NginxConfigParser config_parser;
+    NginxConfig config;
+    config_parser.Parse(argv[1], &config);
+
+    std::string address = "0.0.0.0";
+    std::string port = "8080"; // default port if nothing is set in config file
+    std::string docroot = ".";
+
+    // Look for a server block.
+    for (int i = 0; i < config.statements_.size(); i++)
+    {
+      std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
+      if (statement->tokens_.at(0) == "server")
+      {
+        std::vector<std::shared_ptr<NginxConfigStatement>> child = statement->child_block_->statements_;
+        if (child.size() == 1 &&
+          child.at(0)->tokens_.size() == 2 &&
+          child.at(0)->tokens_.at(0) == "listen")
+        {
+          port = child.at(0)->tokens_.at(1);
+          std::cout << "***Listening at port " << port << "***\n";
+        }
+      }
+    }
+
     // Initialise the server.
-    http::server::server s(argv[1], argv[2], argv[3]);
+    http::server::server s(address, port, docroot);
 
     // Run the server until stopped.
     s.run();
