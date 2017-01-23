@@ -32,22 +32,26 @@ int main(int argc, char* argv[])
     config_parser.Parse(argv[1], &config);
 
     std::string address = "0.0.0.0";
-    std::string port = "8080"; // default port if nothing is set in config file
+    std::string port = "80"; // default port if nothing is set in config file
     std::string docroot = ".";
 
     // Look for a server block.
     for (int i = 0; i < config.statements_.size(); i++)
     {
       std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
-      if (statement->tokens_.at(0) == "server")
+      // Look for a listen statement.
+      for (int j = 0; j < statement->tokens_.size(); j++)
       {
-        std::vector<std::shared_ptr<NginxConfigStatement>> child = statement->child_block_->statements_;
-        if (child.size() == 1 &&
-          child.at(0)->tokens_.size() == 2 &&
-          child.at(0)->tokens_.at(0) == "listen")
+        if (statement->tokens_.at(j) == "server")
         {
-          port = child.at(0)->tokens_.at(1);
-          std::cout << "***Listening at port " << port << "***\n";
+          std::vector<std::shared_ptr<NginxConfigStatement>> child = statement->child_block_->statements_;
+          if (child.size() == 1 &&
+            child.at(0)->tokens_.size() == 2 &&
+            child.at(0)->tokens_.at(0) == "listen")
+          {
+            port = child.at(0)->tokens_.at(1);
+            std::cout << "***Listening at port " << port << "***\n";
+          }
         }
       }
     }
