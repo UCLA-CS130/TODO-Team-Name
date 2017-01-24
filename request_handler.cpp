@@ -25,8 +25,9 @@ request_handler::request_handler(const std::string& doc_root)
 {
 }
 
-void request_handler::handle_request(const request& req, reply& rep)
+void request_handler::handle_request(const char buffer_[8192], reply& rep)
 {
+  /*
   // Decode url to path.
   std::string request_path;
   if (!url_decode(req.uri, request_path))
@@ -66,12 +67,15 @@ void request_handler::handle_request(const request& req, reply& rep)
     rep = reply::stock_reply(reply::not_found);
     return;
   }
+  */
+  //always extension txt
+  std::string extension = "html";
 
   // Fill out the reply to be sent to the client.
   rep.status = reply::ok;
-  char buf[512];
-  while (is.read(buf, sizeof(buf)).gcount() > 0)
-    rep.content.append(buf, is.gcount());
+  for (int i =0; buffer_[i] != '\0' || i < 8192; i++)
+    rep.content.append(1, buffer_[i]);
+
   rep.headers.resize(2);
   rep.headers[0].name = "Content-Length";
   rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());
