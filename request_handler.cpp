@@ -73,7 +73,7 @@ void request_handler::handle_request(const char buffer_[8192], reply& rep)
 
   // Fill out the reply to be sent to the client.
   rep.status = reply::ok;
-  for (int i =0; buffer_[i] != '\0' || i < 8192; i++)
+  for (int i =0; i<8192 && buffer_[i] != '\0'; i++)
     rep.content.append(1, buffer_[i]);
 
   rep.headers.resize(2);
