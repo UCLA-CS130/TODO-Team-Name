@@ -29,7 +29,7 @@ public:
   explicit request_handler(const std::string& doc_root);
 
   /// Handle a request and produce a reply.
-  void handle_request(const request& req, reply& rep);
+  void handle_request(const char buffer_[8192], reply& rep);
 
 private:
   /// The directory containing the files to be served.

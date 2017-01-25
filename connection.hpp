@@ -63,7 +63,7 @@ private:
   request_handler& request_handler_;
 
   /// Buffer for incoming data.
-  boost::array<char, 8192> buffer_;
+  char buffer_[8192] = {0};
 
   /// The incoming request.
   request request_;
