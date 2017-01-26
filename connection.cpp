@@ -25,62 +25,51 @@ connection::connection(boost::asio::io_service& io_service,
 {
 }
 
-boost::asio::ip::tcp::socket& connection::socket()
-{
+boost::asio::ip::tcp::socket& connection::socket() {
   return socket_;
 }
 
-void connection::start()
-{
+void connection::start() {
   socket_.async_read_some(boost::asio::buffer(buffer_),
       boost::bind(&connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
 }
 
-void connection::stop()
-{
+void connection::stop() {
   socket_.close();
 }
 
 void connection::handle_read(const boost::system::error_code& e,
-    std::size_t bytes_transferred)
-{
-  if (!e)
-  {
+    std::size_t bytes_transferred) {
+  if (!e) {
 
-    if (buffer_[0] != '\0')
-    {
+    if (buffer_[0] != '\0') {
       request_handler_.handle_request(buffer_, reply_);
       boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
     }
-    else
-    {
+    else {
       reply_ = reply::stock_reply(reply::bad_request);
       boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
     }
   }
-  else if (e != boost::asio::error::operation_aborted)
-  {
+  else if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }
 }
 
-void connection::handle_write(const boost::system::error_code& e)
-{
-  if (!e)
-  {
+void connection::handle_write(const boost::system::error_code& e) {
+  if (!e) {
     // Initiate graceful connection closure.
     boost::system::error_code ignored_ec;
     socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
   }
 
-  if (e != boost::asio::error::operation_aborted)
-  {
+  if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }
 }
