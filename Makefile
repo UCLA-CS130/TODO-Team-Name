@@ -1,5 +1,5 @@
 CXXFLAGS=-std=c++0x -Wall -Werror
-SRC_FILES=main.cpp nginx-configparser/config_parser.cc server.cpp connection.cpp connection_manager.cpp request_handler.cpp reply.cpp mime_types.cpp
+SRC_FILES=main.cpp nginx-configparser/config_parser.cc server.cpp connection.cpp connection_manager.cpp request_handler.cpp reply.cpp
 
 
 all: webserver 

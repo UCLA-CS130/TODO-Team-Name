@@ -15,15 +15,13 @@
 namespace http {
 namespace server {
 
-server::server(const std::string& address, const std::string& port,
-    const std::string& doc_root)
+server::server(const std::string& address, const std::string& port)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    request_handler_(doc_root)
-{
+    request_handler_() {
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
   // provided all registration for the specified signal is made through Asio.
@@ -46,8 +44,7 @@ server::server(const std::string& address, const std::string& port,
   start_accept();
 }
 
-void server::run()
-{
+void server::run() {
   // The io_service::run() call will block until all asynchronous operations
   // have finished. While the server is running, there is always at least one
   // asynchronous operation outstanding: the asynchronous accept call waiting
@@ -55,8 +52,7 @@ void server::run()
   io_service_.run();
 }
 
-void server::start_accept()
-{
+void server::start_accept() {
   new_connection_.reset(new connection(io_service_,
         connection_manager_, request_handler_));
   acceptor_.async_accept(new_connection_->socket(),
@@ -64,25 +60,21 @@ void server::start_accept()
         boost::asio::placeholders::error));
 }
 
-void server::handle_accept(const boost::system::error_code& e)
-{
+void server::handle_accept(const boost::system::error_code& e) {
   // Check whether the server was stopped by a signal before this completion
   // handler had a chance to run.
-  if (!acceptor_.is_open())
-  {
+  if (!acceptor_.is_open()) {
     return;
   }
 
-  if (!e)
-  {
+  if (!e) {
     connection_manager_.start(new_connection_);
   }
 
   start_accept();
 }
 
-void server::handle_stop()
-{
+void server::handle_stop() {
   // The server is stopped by cancelling all outstanding asynchronous
   // operations. Once all operations have finished the io_service::run() call
   // will exit.
