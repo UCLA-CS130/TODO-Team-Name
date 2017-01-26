@@ -36,11 +36,11 @@ int main(int argc, char* argv[])
     std::string docroot = ".";
 
     // Look for a server block.
-    for (int i = 0; i < config.statements_.size(); i++)
+    for (unsigned int i = 0; i < config.statements_.size(); i++)
     {
       std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
       // Look for a listen statement.
-      for (int j = 0; j < statement->tokens_.size(); j++)
+      for (unsigned int j = 0; j < statement->tokens_.size(); j++)
       {
         if (statement->tokens_.at(j) == "server")
         {
