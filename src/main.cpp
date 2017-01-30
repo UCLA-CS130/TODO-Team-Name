@@ -13,7 +13,7 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "server.hpp"
-#include "/nginx-configparser/config_parser.h"
+#include "nginx-configparser/config_parser.h"
 
 // Given a parsed config file, return the port number
 std::string get_port(NginxConfig config) {
