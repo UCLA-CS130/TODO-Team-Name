@@ -15,13 +15,8 @@
 #include "server.hpp"
 #include "nginx-configparser/config_parser.h"
 
-// Parse the config file and return the port number
-std::string get_port(char * config_file) {
-  NginxConfigParser config_parser;
-  NginxConfig config;
-  config_parser.Parse(config_file, &config);
-  std::string port;
-
+// Given a parsed config file, return the port number
+std::string get_port(NginxConfig config) {
   // Look for a server block.
   for (unsigned int i = 0; i < config.statements_.size(); i++) {
     std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
@@ -32,36 +27,62 @@ std::string get_port(char * config_file) {
         if (child.size() == 1 &&
             child.at(0)->tokens_.size() == 2 &&
             child.at(0)->tokens_.at(0) == "listen") {
-          port = child.at(0)->tokens_.at(1);
-          std::cout << "Listening at port " << port << "\n";
-          return port;
+          return child.at(0)->tokens_.at(1);
         }
       }
     }
   }
+  // Port number not defined correctly in config file.
+  return "";
+}
 
-  return "80"; // default port if nothing is specified in config
+// Parse the config file
+bool parse_config(char * config_file, std::string * port) {
+  NginxConfigParser config_parser;
+  NginxConfig config;
+
+  if (!config_parser.Parse(config_file, &config)) {
+    return false;
+  }
+
+  *port = get_port(config);
+  if (*port == "") {
+    return false;
+  }
+
+  // Port number must be a valid number
+  int port_as_num = std::stoi(*port);
+  if (port_as_num > 65535 || port_as_num < 0) {
+    std::cerr << "Port must be a valid number ranging from 0 to 65535.\n";
+    return false;
+  }
+
+  return true;
 }
 
 
 int main(int argc, char* argv[]) {
   try {
 
-    // Constants / default configs
-    const std::string usage = "Usage: ./webserver <config_file>\n";
-    const std::string address = "0.0.0.0";
-
     // Check command line arguments.
     if (argc != 2) {
-      std::cerr << usage;
+      std::cerr << "Usage: ./webserver <config_file>\n";
       return 1;
     }
 
     // Initialise the server.
-    http::server::server s(address, get_port(argv[1]));
+    std::string port = "";
+    if (parse_config(argv[1], &port)) {
+      http::server::server s("0.0.0.0", port);
+      std::cout << "Listening at port " << port << "\n";
+      // Run the server until stopped.
+      s.run();
+    }
+    else {
+      std::cerr << "ERROR: Could not parse config file.\n" <<
+      "Please check that your port number is defined correctly and try again.\n";
+    }
 
-    // Run the server until stopped.
-    s.run();
   } catch (std::exception& e) {
     std::cerr << "exception: " << e.what() << "\n";
   }
