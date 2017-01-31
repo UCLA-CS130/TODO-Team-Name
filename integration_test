@@ -14,16 +14,19 @@ echo "Sending a curl request"
 curl -i -s localhost:8080 > test_output
 
 # Verify the response from the server works as expected
-DIFF=$(diff expected_output test_output)
+diff expected_output test_output
+EXIT_STATUS=$?
 
 # Indicate success or failure with an appropriate exit code
-if [ "$DIFF" == "" ]
+# Diff returns 0 if there are no differences, 1 if there are,
+# and another number if something else went wrong
+if [ "$EXIT_STATUS" -eq 0 ]
 then
 	echo "SUCCESS: Integration test produced expected output"
 else
 	echo "Integration test did not produce the expected result"
 	echo "Diff of curl output:"
-	echo $DIFF
+	echo diff expected_output test_output
 fi
 
 # Shutdown the webserver
@@ -31,3 +34,5 @@ echo "Cleaning up and shutting down"
 pkill webserver
 rm test_config
 rm test_output
+
+exit "$EXIT_STATUS"

@@ -7,6 +7,11 @@ webserver: $(SRC_FILES)
 	g++ $(CXXFLAGS) -I$(BOOST_PATH) -I. $(SRC_FILES) -o webserver -lpthread -lboost_system \
 	-L$(BOOST_PATH)
 
+test:
+
+integration:
+	./integration_test
+
 clean:
 	rm -rf *.o webserver 
 
