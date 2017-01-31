@@ -5,18 +5,29 @@ make clean
 make
 
 # Start the server
- echo "server { listen 8080; }" >> test_config
-./webserver test_config
+echo "Running an integration test on the server"
+echo "server { listen 8080; }" >> test_config
+./webserver test_config &>/dev/null &
 
 # Send a request to the server using curl
-# TODO
+echo "Sending a curl request"
+curl -i -s localhost:8080 > test_output
 
 # Verify the response from the server works as expected
-# TODO
+DIFF=$(diff expected_output test_output)
 
 # Indicate success or failure with an appropriate exit code
-# TODO
+if [ "$DIFF" == "" ]
+then
+	echo "SUCCESS: Integration test produced expected output"
+else
+	echo "Integration test did not produce the expected result"
+	echo "Diff of curl output:"
+	echo $DIFF
+fi
 
 # Shutdown the webserver
-# kill %1
-# rm test_config
+echo "Cleaning up and shutting down"
+pkill webserver
+rm test_config
+rm test_output
