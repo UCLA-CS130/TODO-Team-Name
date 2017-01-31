@@ -29,6 +29,9 @@ public:
   /// Construct the server to listen on the specified TCP address and port
   explicit server(const std::string& address, const std::string& port);
 
+  // see if server is valid
+  bool isValid(const std::string& address, const std::string& port);
+
   /// Run the server's io_service loop.
   void run();
 
