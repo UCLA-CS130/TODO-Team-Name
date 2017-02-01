@@ -48,14 +48,14 @@ server::server(const std::string& address, const std::string& port)
 
 bool server::isValid(const std::string& address, const std::string& port){
   if (port == "") {
-    std::cout << "Please specify a port.\n";
+    std::cerr << "Please specify a port.\n";
     return false;
   }
 
   // Port number must be a valid number
   int port_as_num = std::stoi(port);
   if (port_as_num > 65535 || port_as_num < 0) {
-    std::cout << "Port must be a valid number ranging from 0 to 65535.\n";
+    std::cerr << "Port must be a valid number ranging from 0 to 65535.\n";
     return false;
   }
 
