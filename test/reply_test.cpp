@@ -7,8 +7,8 @@
 
 TEST(StockReplyTest, BadRequest){
 	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
-	std::string expectedHeader0 = "<html><head><title>Bad Request</title></head><body><h1>400 Bad Request</h1></body></html>";
-	EXPECT_EQ(reply_.content, expectedHeader0);
+	std::string expectedHeader = "<html><head><title>Bad Request</title></head><body><h1>400 Bad Request</h1></body></html>";
+	EXPECT_EQ(reply_.content, expectedHeader);
 }
 
 class ReplyTest : public ::testing::Test {

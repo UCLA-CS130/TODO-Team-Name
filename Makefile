@@ -1,9 +1,11 @@
 CXXFLAGS=-std=c++0x -Wall -Werror
 SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
 GTEST_PATH=nginx-configparser/googletest/googletest
+GMOCK_PATH=nginx-configparser/googletest/googlemock
 TEST_FILES=test/*.cpp
 COVERAGE_FLAGS=-fprofile-arcs -ftest-coverage
-all: webserver
+
+all: webserver 
 
 webserver: $(SRC_FILES)
 	g++ $(CXXFLAGS) -I$(BOOST_PATH) -I. $(SRC_FILES) -o webserver -lpthread -lboost_system \
@@ -19,6 +21,14 @@ test: $(SRC_FILES) $(TEST_FILES)
 
 	g++ $(CXXFLAGS) -I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc test/reply_test.cpp \
 	src/reply.cpp src/request_handler.cpp test/libgtest.a -o reply_test -lpthread -lboost_system -L$(BOOST_PATH)
+  
+	g++ $(CXXFLAGS) -I$(GTEST_PATH)/include -I$(GMOCK_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc test/connection_test.cpp \
+	src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp test/libgtest.a -o \
+	connection_test -lpthread -lboost_system -L$(BOOST_PATH)
+
+	g++ $(CXXFLAGS) -I$(GTEST_PATH)/include -I$(GMOCK_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc test/connection_manager_test.cpp \
+	src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp test/libgtest.a -o \
+	connection_manager_test -lpthread -lboost_system -L$(BOOST_PATH)
 
 coverage: CXXFLAGS+=$(COVERAGE_FLAGS)
 coverage: test

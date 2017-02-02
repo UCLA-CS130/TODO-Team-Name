@@ -18,12 +18,8 @@ TEST(ServerTest, PortTooBig) {
 TEST(ServerTest, PortIsNegative) {
 	std::string addr = "0.0.0.0";
 	std::string port = "-1";
-
-	try{
-		http::server::server server_(addr, port);	
-	} catch (std::exception& e) {
-    	std::cout << "Exception: " << "Negative Port. \n";
-  	}
+	
+	EXPECT_ANY_THROW(http::server::server server_(addr, port));	
 }
 
 TEST(ServerTest, NoPort) {
