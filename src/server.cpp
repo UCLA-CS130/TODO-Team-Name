@@ -11,6 +11,7 @@
 #include "server.hpp"
 #include <boost/bind.hpp>
 #include <signal.h>
+#include <iostream>
 
 namespace http {
 namespace server {
@@ -22,6 +23,7 @@ server::server(const std::string& address, const std::string& port)
     connection_manager_(),
     new_connection_(),
     request_handler_() {
+
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
   // provided all registration for the specified signal is made through Asio.
@@ -42,6 +44,22 @@ server::server(const std::string& address, const std::string& port)
   acceptor_.listen();
 
   start_accept();
+}
+
+bool server::isValid(const std::string& address, const std::string& port){
+  if (port == "") {
+    std::cout << "Please specify a port.\n";
+    return false;
+  }
+
+  // Port number must be a valid number
+  int port_as_num = std::stoi(port);
+  if (port_as_num > 65535 || port_as_num < 0) {
+    std::cout << "Port must be a valid number ranging from 0 to 65535.\n";
+    return false;
+  }
+
+  return true;
 }
 
 void server::run() {

@@ -47,6 +47,7 @@ bool parse_config(char * config_file, std::string * port) {
 
   *port = get_port(config);
   if (*port == "") {
+    std::cout << "Please specify a port.\n";
     return false;
   }
 
@@ -70,7 +71,7 @@ int main(int argc, char* argv[]) {
       return 1;
     }
 
-    // Initialise the server.
+    // Initialize the server.
     std::string port = "";
     if (parse_config(argv[1], &port)) {
       http::server::server s("0.0.0.0", port);
