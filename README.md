@@ -19,6 +19,11 @@ The server can be accessed via a variety of methods:
 * Use your browser to view the resource (for example, `http://localhost:8080/`).
 * Use a curl request: `curl -i localhost:8080`
 
+### Running tests
+* `make integration` runs the integration test only
+* `make test` builds the test binaries for the individual files
+* `make all-tests` builds and runs all unit and integration tests
+
 
 ###Dealing with bound ports
 If when running the server you get an error that the port is already bound,
