@@ -21,7 +21,7 @@ test: $(SRC_FILES) $(TEST_FILES)
 
 	g++ $(CXXFLAGS) -I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc test/reply_test.cpp \
 	src/reply.cpp src/request_handler.cpp test/libgtest.a -o reply_test -lpthread -lboost_system -L$(BOOST_PATH)
-
+  
 	g++ $(CXXFLAGS) -I$(GTEST_PATH)/include -I$(GMOCK_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc test/connection_test.cpp \
 	src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp test/libgtest.a -o \
 	connection_test -lpthread -lboost_system -L$(BOOST_PATH)
@@ -40,7 +40,7 @@ coverage: test
 	gcov -r server.cpp > server_coverage 
 
 integration:
-	./integration_test
+	./integration_test.sh
 
 clean:
 	rm -rf *.o webserver *_test *_info *_coverage *.gcov *.gcda *.gcno
