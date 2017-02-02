@@ -33,11 +33,17 @@ test: $(SRC_FILES) $(TEST_FILES)
 coverage: CXXFLAGS+=$(COVERAGE_FLAGS)
 coverage: test
 	./reply_test > reply_test_info; \
+	./request_handler_test > request_handler_test_info; \
+	./server_test > server_test_info; \
+	./connection_test > connection_test_info; \
+	./connection_manager_test > connection_manager_test_info; \
+	\
 	gcov -r reply.cpp > reply_coverage; \
 	gcov -r request_handler.cpp > request_handler_coverage; \
+	gcov -r server.cpp > server_coverage; \
+	gcov -r connection.cpp > connection_coverage; \
+	gcov -r connection_manager.cpp > connection_manager_coverage;
 	
-	./server_test > server_test_info; \
-	gcov -r server.cpp > server_coverage 
 
 integration:
 	./integration_test.sh
