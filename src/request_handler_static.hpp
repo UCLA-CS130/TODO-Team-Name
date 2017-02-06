@@ -29,6 +29,9 @@ public:
 private:
   /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
   static bool url_decode(const std::string& in, std::string& out);
+
+  /// The directory containing the files to be served.
+  std::string static_file_root_;
 };
 
 } // namespace server

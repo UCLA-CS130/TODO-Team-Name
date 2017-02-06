@@ -21,8 +21,8 @@
 namespace http {
 namespace server {
 
-request_handler_static::request_handler_static(const std::string& static_file_location) {
-	static_file_location_ = static_file_location;
+request_handler_static::request_handler_static(const std::string& static_file_root) {
+	static_file_root_ = static_file_root;
 }
 
 // Serve the static file that is requested
@@ -56,7 +56,7 @@ void request_handler_static::handle_request(const request& req, reply& rep) {
   }
 
   // Open the file to send back.
-  std::string full_path = static_file_location_ + request_path;
+  std::string full_path = static_file_root_ + request_path;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
     rep = reply::stock_reply(reply::not_found);

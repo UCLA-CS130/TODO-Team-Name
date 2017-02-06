@@ -24,11 +24,6 @@ class request_handler {
 public:
   /// Handle a request and produce an echo response.
   virtual void handle_request(const request& req, reply& rep) = 0;
-
-  /// The directory containing the files to be served.
-  // TODO: this probably shouldn't be defined here (only request_handler_static needs it and it probably should be private
-  // , but this is the only way I could get it to compile :( help please))
-  std::string static_file_location_;
 };
 
 } // namespace server

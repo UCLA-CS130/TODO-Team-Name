@@ -26,7 +26,7 @@
 
 struct server_options {
   std::string port;
-  std::string static_file_location;
+  std::string static_file_root;
   std::string echo_handler;
   std::string static_handler;
 };
@@ -35,7 +35,7 @@ struct server_options {
 void get_server_options(NginxConfig config, server_options *server_options_pointer) {
 
   server_options_pointer->port = "";
-  server_options_pointer->static_file_location = "";
+  server_options_pointer->static_file_root = "";
   server_options_pointer->echo_handler = "";
   server_options_pointer->static_handler = "";
 
@@ -68,7 +68,7 @@ void get_server_options(NginxConfig config, server_options *server_options_point
             std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = server_block_line->child_block_->statements_;
             if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
               && static_handler_statements.at(0)->tokens_.at(0) == "root") {
-              server_options_pointer->static_file_location = static_handler_statements.at(0)->tokens_.at(1);
+              server_options_pointer->static_file_root = static_handler_statements.at(0)->tokens_.at(1);
             }
 
           }
@@ -91,9 +91,15 @@ bool parse_config(char * config_file, server_options *server_options_pointer) {
 
   get_server_options(config, server_options_pointer);
   std::string port = server_options_pointer->port;
+  std::string static_file_root = server_options_pointer->static_file_root;
 
   if (port == "") {
     std::cerr << "Please specify a port.\n";
+    return false;
+  }
+
+  if (static_file_root == "") {
+    std::cerr << "Please specify a root directory from which to serve static files.\n";
     return false;
   }
 
@@ -104,13 +110,15 @@ bool parse_config(char * config_file, server_options *server_options_pointer) {
     return false;
   }
 
+  // TODO: check that static file root is an actual directory that exists?
+
   return true;
 }
 
 void print_parsed_config(server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
   std::cout << "port: " << server_options_pointer->port << "\n";
-  std::cout << "root for static files: " << server_options_pointer->static_file_location << "\n";
+  std::cout << "root for static files: " << server_options_pointer->static_file_root << "\n";
   std::cout << "path to use echo handler: " << server_options_pointer->echo_handler << "\n";
   std::cout << "path to use static handler: " << server_options_pointer->static_handler << "\n";
   std::cout << "*******************************" << "\n";
@@ -133,7 +141,8 @@ int main(int argc, char* argv[]) {
       print_parsed_config(&server_options_);
 
       std::string port = server_options_.port;
-      http::server::server s("0.0.0.0", port);
+      std::string static_file_root = server_options_.static_file_root;
+      http::server::server s("0.0.0.0", port, static_file_root);
       std::cerr << "Listening at port " << port << "\n";
       // Run the server until stopped.
       s.run();
