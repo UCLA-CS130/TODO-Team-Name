@@ -12,7 +12,6 @@
 #define HTTP_REQUEST_HANDLER_HPP
 
 #include <string>
-#include <boost/noncopyable.hpp>
 
 namespace http {
 namespace server {
@@ -21,12 +20,10 @@ struct reply;
 struct request;
 
 /// The common handler for all incoming requests.
-class request_handler
-  : private boost::noncopyable
-{
+class request_handler {
 public:
   /// Handle a request and produce an echo response.
-  void handle_request(const request& req, reply& rep);
+  virtual void handle_request(const request& req, reply& rep) = 0;
 
   /// The directory containing the files to be served.
   // TODO: this probably shouldn't be defined here (only request_handler_static needs it and it probably should be private

@@ -8,24 +8,19 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include "reply.hpp"
 #include "request.hpp"
-#define BUFFER_SIZE 8192
 
 namespace http {
 namespace server {
 
-class request_handler_echo : public request_handler {
-
 // Simple 'echo' response
-void handle_request(const request& req, reply& rep) {
-
-  // Fill out the reply to be sent to the client.
+void request_handler_echo::handle_request(const request& req, reply& rep) {
   rep.status = reply::ok; // 200 OK response
   rep.content = req.full_header;
   rep.headers.resize(2);
@@ -34,8 +29,6 @@ void handle_request(const request& req, reply& rep) {
   rep.headers[1].name = "Content-Type";
   rep.headers[1].value = "text/plain";
 }
-
-}; // request_handler_echo class
 
 } // namespace server
 } // namespace http

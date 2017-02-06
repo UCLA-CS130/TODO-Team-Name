@@ -8,7 +8,6 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "request_handler.hpp"
 #include "request_handler_static.hpp"
 #include <fstream>
 #include <sstream>
@@ -22,28 +21,19 @@
 namespace http {
 namespace server {
 
-class request_handler_static : public http::server::request_handler {
-
-request_handler_static(const std::string& static_file_location) {
+request_handler_static::request_handler_static(const std::string& static_file_location) {
 	static_file_location_ = static_file_location;
 }
 
 // Serve the static file that is requested
-void handle_request(const request& req, reply& rep) {
-
-  // TODO: parse request for req.uri
-  // The following used to be called in connection.ccp:
-  //request_parser_.parse(request_, buffer_.data(), buffer_.data() + bytes_transferred);
+void request_handler_static::handle_request(const request& req, reply& rep) {
 
   // Decode url to path.
-  // std::string request_path;
-  // if (!url_decode(req.uri, request_path)) {
-  //   rep = reply::stock_reply(reply::bad_request);
-  //   return;
-  // }
-
-  // The following is a placeholder until request parsing can be figured out.
-  std::string request_path = "/index.html";
+  std::string request_path;
+  if (!url_decode(req.uri, request_path)) {
+    rep = reply::stock_reply(reply::bad_request);
+    return;
+  }
 
   // Request path must be absolute and not contain "..".
   if (request_path.empty() || request_path[0] != '/'
@@ -85,7 +75,7 @@ void handle_request(const request& req, reply& rep) {
   rep.headers[1].value = mime_types::extension_to_type(extension);
 }
 
-bool url_decode(const std::string& in, std::string& out) {
+bool request_handler_static::url_decode(const std::string& in, std::string& out) {
   out.clear();
   out.reserve(in.size());
   for (std::size_t i = 0; i < in.size(); ++i) {
@@ -114,8 +104,6 @@ bool url_decode(const std::string& in, std::string& out) {
   }
   return true;
 }
-
-}; // request_handler_static class
 
 } // namespace server
 } // namespace http
