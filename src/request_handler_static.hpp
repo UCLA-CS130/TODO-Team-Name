@@ -1,5 +1,5 @@
 //
-// request_handler.hpp
+// request_handler_static.hpp
 // ~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -11,8 +11,7 @@
 #ifndef HTTP_REQUEST_HANDLER_HPP
 #define HTTP_REQUEST_HANDLER_HPP
 
-#include <string>
-#include <boost/noncopyable.hpp>
+#include "request_handler.hpp"
 
 namespace http {
 namespace server {
@@ -20,18 +19,16 @@ namespace server {
 struct reply;
 struct request;
 
-/// The common handler for all incoming requests.
-class request_handler
-  : private boost::noncopyable
-{
+/// Handler for atatic file requests.
+class request_handler_static : public http::server::request_handler {
 public:
+  request_handler_static(const std::string& static_file_location);
   /// Handle a request and produce an echo response.
-  void handle_request(const char buffer_[8192], reply& rep);
+  void handle_request(const char buffer_[8192], reply& rep) override;
 
-  /// The directory containing the files to be served.
-  // TODO: this probably shouldn't be defined here (only request_handler_static needs it and it probably should be private
-  // , but this is the only way I could get it to compile :( help please))
-  std::string static_file_location_;
+private:
+  /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
+  static bool url_decode(const std::string& in, std::string& out);
 };
 
 } // namespace server
