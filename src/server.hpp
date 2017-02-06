@@ -64,6 +64,9 @@ private:
 
   /// The handler for incoming static requests.
   request_handler_static request_handler_static_;
+
+  /// The handler for incoming echo requests.
+  request_handler_echo request_handler_echo_;
 };
 
 } // namespace server

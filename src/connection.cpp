@@ -18,10 +18,12 @@ namespace http {
 namespace server {
 
 connection::connection(boost::asio::io_service& io_service,
-    connection_manager& manager, request_handler& handler)
+    connection_manager& manager, request_handler_static& handler_static,
+      request_handler_echo& handler_echo)
   : socket_(io_service),
     connection_manager_(manager),
-    request_handler_(handler)
+    request_handler_static_(handler_static),
+    request_handler_echo_(handler_echo)
 {
 }
 
@@ -47,7 +49,17 @@ void connection::handle_read(const boost::system::error_code& e,
     boost::tie(result, boost::tuples::ignore) = request_parser_.parse(request_, buffer_.data(), buffer_.data() + bytes_transferred);
 
     if (result) {
-      request_handler_.handle_request(request_, reply_);
+
+      // TODO: request type isn't being set correctly, need to set up logging to debug
+
+      // Use parsed request to determine whether it wants an echo or a file
+      // if (request_.request_type == request::static_file) {
+      //   request_handler_static_.handle_request(request_, reply_);
+      // }
+      // else {
+      //   request_handler_echo_.handle_request(request_, reply_);
+      // }
+      request_handler_echo_.handle_request(request_, reply_);
       boost::asio::async_write(socket_, reply_.to_buffers(),
         boost::bind(&connection::handle_write, shared_from_this(),
           boost::asio::placeholders::error));
