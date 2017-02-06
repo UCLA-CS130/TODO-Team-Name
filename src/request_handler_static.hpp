@@ -24,7 +24,7 @@ class request_handler_static : public http::server::request_handler {
 public:
   request_handler_static(const std::string& static_file_location);
   /// Handle a request and produce an echo response.
-  void handle_request(const char buffer_[8192], reply& rep) override;
+  void handle_request(const request& req, reply& rep) override;
 
 private:
   /// Perform URL-decoding on a string. Returns false if the encoding is invalid.

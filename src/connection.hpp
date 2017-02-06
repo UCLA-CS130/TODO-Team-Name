@@ -19,6 +19,7 @@
 #include "reply.hpp"
 #include "request.hpp"
 #include "request_handler.hpp"
+#include "request_parser.hpp"
 
 namespace http {
 namespace server {
@@ -62,13 +63,13 @@ private:
   request_handler& request_handler_;
 
   /// Buffer for incoming data.
-  char buffer_[8192] = {0};
+  std::array<char, 1024> buffer_;
 
   /// The incoming request.
   request request_;
 
   /// The parser for the incoming request.
-  ///request_parser request_parser_;
+  request_parser request_parser_;
 
   /// The reply to be sent back to the client.
   reply reply_;

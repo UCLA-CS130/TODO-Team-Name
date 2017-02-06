@@ -43,20 +43,29 @@ void connection::stop() {
 void connection::handle_read(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
   if (!e) {
+    boost::tribool result;
+    boost::tie(result, boost::tuples::ignore) = request_parser_.parse(request_, buffer_.data(), buffer_.data() + bytes_transferred);
 
-    if (buffer_[0] != '\0') {
-      request_handler_.handle_request(buffer_, reply_);
+    if (result) {
+      request_handler_.handle_request(request_, reply_);
       boost::asio::async_write(socket_, reply_.to_buffers(),
-          boost::bind(&connection::handle_write, shared_from_this(),
-            boost::asio::placeholders::error));
+        boost::bind(&connection::handle_write, shared_from_this(),
+          boost::asio::placeholders::error));
     }
-    else {
+    else if (!result) {
       reply_ = reply::stock_reply(reply::bad_request);
       boost::asio::async_write(socket_, reply_.to_buffers(),
-          boost::bind(&connection::handle_write, shared_from_this(),
-            boost::asio::placeholders::error));
+        boost::bind(&connection::handle_write, shared_from_this(),
+          boost::asio::placeholders::error));
+    }
+    else {
+      socket_.async_read_some(boost::asio::buffer(buffer_),
+        boost::bind(&connection::handle_read, shared_from_this(),
+          boost::asio::placeholders::error,
+          boost::asio::placeholders::bytes_transferred));
     }
   }
+
   else if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }

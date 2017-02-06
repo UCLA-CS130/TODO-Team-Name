@@ -23,7 +23,7 @@ struct request;
 class request_handler_echo : public http::server::request_handler {
 public:
   /// Handle a request and produce an echo response.
-  void handle_request(const char buffer_[8192], reply& rep) override;
+  void handle_request(const request& req, reply& rep) override;
 };
 
 } // namespace server

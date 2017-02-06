@@ -29,7 +29,7 @@ request_handler_static(const std::string& static_file_location) {
 }
 
 // Serve the static file that is requested
-void handle_request(const char buffer_[8192], reply& rep) {
+void handle_request(const request& req, reply& rep) {
 
   // TODO: parse request for req.uri
   // The following used to be called in connection.ccp:

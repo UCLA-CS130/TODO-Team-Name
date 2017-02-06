@@ -26,7 +26,7 @@ class request_handler
 {
 public:
   /// Handle a request and produce an echo response.
-  void handle_request(const char buffer_[8192], reply& rep);
+  void handle_request(const request& req, reply& rep);
 
   /// The directory containing the files to be served.
   // TODO: this probably shouldn't be defined here (only request_handler_static needs it and it probably should be private

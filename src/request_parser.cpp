@@ -24,6 +24,9 @@ void request_parser::reset() {
 }
 
 boost::tribool request_parser::consume(request& req, char input) {
+  // string to contain full header for echo request
+  req.full_header += input;
+
   switch (state_) {
   case method_start:
     if (!is_char(input) || is_ctl(input) || is_tspecial(input)) {
