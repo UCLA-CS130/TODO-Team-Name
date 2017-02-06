@@ -18,13 +18,17 @@
 // Expected format of config file:
 // server {
 //   listen 8080;
-//   static_file_location static;
-//   request static // either 'static' or 'echo'
+//   path /echo EchoHandler;
+//   path /static StaticFileHandler {
+//      root static;
+//   }
 // }
 
 struct server_options {
   std::string port;
   std::string static_file_location;
+  std::string echo_handler;
+  std::string static_handler;
 };
 
 // Given a parsed config file, return a struct containing the config info
@@ -32,6 +36,8 @@ void get_server_options(NginxConfig config, server_options *server_options_point
 
   server_options_pointer->port = "";
   server_options_pointer->static_file_location = "";
+  server_options_pointer->echo_handler = "";
+  server_options_pointer->static_handler = "";
 
   for (unsigned int i = 0; i < config.statements_.size(); i++) {
     std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
@@ -42,16 +48,30 @@ void get_server_options(NginxConfig config, server_options *server_options_point
 
       // Iterate over statements in server block, setting all config options.
       for (unsigned int j = 0; j < server_statements.size(); j++) {
-        std::vector<std::basic_string<char> > server_option_tokens = server_statements.at(j)->tokens_;
+        std::shared_ptr<NginxConfigStatement> server_block_line = server_statements.at(j);
+        std::vector<std::basic_string<char> > server_block_line_tokens = server_block_line->tokens_;
 
         // port
-        if (server_option_tokens.size() == 2 && server_option_tokens.at(0) == "listen") {
-          server_options_pointer->port = server_option_tokens.at(1);
+        if (server_block_line_tokens.size() == 2 && server_block_line_tokens.at(0) == "listen") {
+          server_options_pointer->port = server_block_line_tokens.at(1);
         }
 
-        // directory path for files
-        if (server_option_tokens.size() == 2 && server_option_tokens.at(0) == "static_file_location") {
-          server_options_pointer->static_file_location = server_option_tokens.at(1);
+        // specified paths for whether to return an echo statement or static file
+        if (server_block_line_tokens.size() == 3 && server_block_line_tokens.at(0) == "path") {
+
+          if (server_block_line_tokens.at(2) == "EchoHandler") {
+            server_options_pointer->echo_handler = server_block_line_tokens.at(1);
+          }
+          else if (server_block_line_tokens.at(2) == "StaticFileHandler") {
+            server_options_pointer->static_handler = server_block_line_tokens.at(1);
+            // child block specifies location from which to serve static files
+            std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = server_block_line->child_block_->statements_;
+            if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
+              && static_handler_statements.at(0)->tokens_.at(0) == "root") {
+              server_options_pointer->static_file_location = static_handler_statements.at(0)->tokens_.at(1);
+            }
+
+          }
         }
 
       }
@@ -87,6 +107,14 @@ bool parse_config(char * config_file, server_options *server_options_pointer) {
   return true;
 }
 
+void print_parsed_config(server_options *server_options_pointer) {
+  std::cout << "******** PARSED CONFIG ********\n";
+  std::cout << "port: " << server_options_pointer->port << "\n";
+  std::cout << "root for static files: " << server_options_pointer->static_file_location << "\n";
+  std::cout << "path to use echo handler: " << server_options_pointer->echo_handler << "\n";
+  std::cout << "path to use static handler: " << server_options_pointer->static_handler << "\n";
+  std::cout << "*******************************" << "\n";
+}
 
 int main(int argc, char* argv[]) {
   try {
@@ -100,6 +128,10 @@ int main(int argc, char* argv[]) {
     // Initialize the server.
     server_options server_options_;
     if (parse_config(argv[1], &server_options_)) {
+
+      // for debugging
+      print_parsed_config(&server_options_);
+
       std::string port = server_options_.port;
       http::server::server s("0.0.0.0", port);
       std::cerr << "Listening at port " << port << "\n";
