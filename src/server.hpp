@@ -16,7 +16,8 @@
 #include <boost/noncopyable.hpp>
 #include "connection.hpp"
 #include "connection_manager.hpp"
-#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
+#include "request_handler_static.hpp"
 
 namespace http {
 namespace server {
@@ -27,7 +28,8 @@ class server
 {
 public:
   /// Construct the server to listen on the specified TCP address and port
-  explicit server(const std::string& address, const std::string& port);
+  /// Serve static files from the directory specified by static_file_root
+  explicit server(const std::string& address, const std::string& port, const std::string& static_file_root);
 
   // see if server is valid
   bool isValid(const std::string& address, const std::string& port);
@@ -60,8 +62,11 @@ private:
   /// The next connection to be accepted.
   connection_ptr new_connection_;
 
-  /// The handler for all incoming requests.
-  request_handler request_handler_;
+  /// The handler for incoming static requests.
+  request_handler_static request_handler_static_;
+
+  /// The handler for incoming echo requests.
+  request_handler_echo request_handler_echo_;
 };
 
 } // namespace server

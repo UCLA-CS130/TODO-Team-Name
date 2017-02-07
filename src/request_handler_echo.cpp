@@ -1,5 +1,5 @@
 //
-// request_handler.cpp
+// request_handler_echo.cpp
 // ~~~~~~~~~~~~~~~~~~~
 //
 // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -8,26 +8,21 @@
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
 
-#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include "reply.hpp"
 #include "request.hpp"
-#define BUFFER_SIZE 8192
 
 namespace http {
 namespace server {
 
 // Simple 'echo' response
-void request_handler::handle_request(const char buffer_[BUFFER_SIZE], reply& rep) {
-
-  // Fill out the reply to be sent to the client.
+void request_handler_echo::handle_request(const request& req, reply& rep) {
   rep.status = reply::ok; // 200 OK response
-  for (int i = 0; i< BUFFER_SIZE && buffer_[i] != '\0'; i++)
-    rep.content.append(1, buffer_[i]);
-
+  rep.content = req.full_header;
   rep.headers.resize(2);
   rep.headers[0].name = "Content-Length";
   rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());

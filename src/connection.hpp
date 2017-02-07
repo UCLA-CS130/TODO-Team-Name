@@ -18,7 +18,9 @@
 #include <boost/enable_shared_from_this.hpp>
 #include "reply.hpp"
 #include "request.hpp"
-#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
+#include "request_handler_static.hpp"
+#include "request_parser.hpp"
 
 namespace http {
 namespace server {
@@ -33,7 +35,8 @@ class connection
 public:
   /// Construct a connection with the given io_service.
   explicit connection(boost::asio::io_service& io_service,
-      connection_manager& manager, request_handler& handler);
+      connection_manager& manager, request_handler_static& handler_static,
+      request_handler_echo& handler_echo);
 
   /// Get the socket associated with the connection.
   boost::asio::ip::tcp::socket& socket();
@@ -58,17 +61,20 @@ private:
   /// The manager for this connection.
   connection_manager& connection_manager_;
 
-  /// The handler used to process the incoming request.
-  request_handler& request_handler_;
+  /// The handler used to process incoming file requests.
+  request_handler_static& request_handler_static_;
+
+  /// The handler used to process incoming echo requests.
+  request_handler_echo& request_handler_echo_;
 
   /// Buffer for incoming data.
-  char buffer_[8192] = {0};
+  std::array<char, 1024> buffer_;
 
   /// The incoming request.
   request request_;
 
   /// The parser for the incoming request.
-  ///request_parser request_parser_;
+  request_parser request_parser_;
 
   /// The reply to be sent back to the client.
   reply reply_;

@@ -16,13 +16,14 @@
 namespace http {
 namespace server {
 
-server::server(const std::string& address, const std::string& port)
+server::server(const std::string& address, const std::string& port, const std::string& static_file_root)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    request_handler_() {
+    request_handler_static_(static_file_root),
+    request_handler_echo_() {
 
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
@@ -72,7 +73,7 @@ void server::run() {
 
 void server::start_accept() {
   new_connection_.reset(new connection(io_service_,
-        connection_manager_, request_handler_));
+        connection_manager_, request_handler_static_, request_handler_echo_));
   acceptor_.async_accept(new_connection_->socket(),
       boost::bind(&server::handle_accept, this,
         boost::asio::placeholders::error));
