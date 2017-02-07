@@ -16,6 +16,7 @@
 #include "server.hpp"
 #include "nginx-configparser/config_parser.h"
 #include "server_options.hpp"
+#include <sys/stat.h>
 
 namespace http{
   namespace server{
@@ -86,17 +87,11 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
 
   get_server_options(config, server_options_pointer);
   std::string port = server_options_pointer->port;
-  //std::string static_file_root = server_options_pointer->static_file_root;
 
   if (port == "") {
     std::cerr << "Please specify a port.\n";
     return false;
   }
-
-  // if (static_file_root == "") {
-  //   std::cerr << "Please specify a root directory from which to serve static files.\n";
-  //   return false;
-  // }
 
   // Port number must be a valid number
   int port_as_num = std::stoi(port);
@@ -105,7 +100,40 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
     return false;
   }
 
-  // TODO: check that static file root is an actual directory that exists?
+  //TODO: Possibly support different static handlers
+  
+  // NOTE: Boost filesystem is awful and from the stone age.
+  // If you want to try this code, compile using -lboost_filesystem and #include <boost/filesystem.hpp>.
+  // It doesnt work however, because boost uses c++98 strings instead of c++11 strings (I think)
+  // http://stackoverflow.com/questions/38807501/boostfilesystemexists-segfault-on-linux
+
+  // //loop through map of server options and make sure the root's exist
+  // for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+  //   //create a boost path out of suggested root
+  //   boost::filesystem::path root_dir(it->second);
+  //   if(!boost::filesystem::is_directory(root_dir)){ // true, directory exists
+  //     //directory does not exist
+  //     std::cerr << "Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
+  //     return false;
+  //   }
+  // }
+
+
+  //TODO: check other folders on local system maybe? so far all must be foward of .
+  //loop through map of server options and make sure the root's exist
+  struct stat sb;
+  std::string thePath;
+  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+    //create a boost path out of suggested root
+    thePath = "./" + it->second;
+    if(stat(thePath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
+      //directory exists
+    }
+    else{
+      std::cerr << "ERROR: Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
+      return false;
+    }
+  }
 
   return true;
 }
@@ -116,9 +144,8 @@ void print_parsed_config(http::server::server_options *server_options_pointer) {
   std::cout << "path to use echo handler: " << server_options_pointer->echo_handler << "\n";
 
   
-  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it)
-  {
-    std::cout << it->first << " " << it->second << "\n";
+  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+    std::cout << "static handler path: "<< it->first << " accesses root directory of: " << it->second << "\n";
   }
   std::cout << "*******************************" << "\n";
 }
@@ -145,8 +172,7 @@ int main(int argc, char* argv[]) {
       s.run();
     }
     else {
-      std::cerr << "ERROR: Could not parse config file.\n" <<
-      "Please check that your port number is defined correctly and try again.\n";
+      std::cerr << "ERROR: Could not parse config file.\n";
     }
 
   } catch (std::exception& e) {
