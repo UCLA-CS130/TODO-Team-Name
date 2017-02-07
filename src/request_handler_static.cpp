@@ -35,6 +35,9 @@ void request_handler_static::handle_request(const request& req, reply& rep) {
     return;
   }
 
+  std::string temp = "static";
+  request_path = request_path.substr(request_path.find(temp)+temp.length()); 
+
   // Request path must be absolute and not contain "..".
   if (request_path.empty() || request_path[0] != '/'
       || request_path.find("..") != std::string::npos) {
