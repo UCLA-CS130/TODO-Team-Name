@@ -232,20 +232,6 @@ boost::tribool request_parser::consume(request& req, char input) {
   default:
     return false;
   }
-
-  // TODO: figure out logging to debug this so it can work
-
-  // Extract request type from beginning of URL
-  // std::string request_type = req.uri.substr(0, req.uri.find("/"));
-  // if (request_type == "static") {
-  //   req.request_type = request::static_file;
-  // }
-  // // Default to echo request
-  // else {
-  //   req.request_type = request::echo;
-  // }
-
-  //req.uri = req.uri.substr(req.uri.find("/"), req.uri.length());
 }
 
 bool request_parser::is_char(int c) {

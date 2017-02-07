@@ -18,9 +18,12 @@
 #include "connection_manager.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include "server_options.hpp"
 
 namespace http {
 namespace server {
+
+struct server_options;
 
 /// The top-level class of the HTTP server.
 class server
@@ -29,7 +32,7 @@ class server
 public:
   /// Construct the server to listen on the specified TCP address and port
   /// Serve static files from the directory specified by static_file_root
-  explicit server(const std::string& address, const std::string& port, const std::string& static_file_root);
+  explicit server(const std::string& address, const server_options* server_options_);
 
   // see if server is valid
   bool isValid(const std::string& address, const std::string& port);
@@ -67,6 +70,9 @@ private:
 
   /// The handler for incoming echo requests.
   request_handler_echo request_handler_echo_;
+
+  //pointer to server_options
+  const server_options* server_options_;
 };
 
 } // namespace server

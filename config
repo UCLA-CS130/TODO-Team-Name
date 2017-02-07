@@ -1,7 +1,10 @@
 server {
 	listen 8080;
 	path /echo EchoHandler;
-	path /static StaticFileHandler {
+	path /static1 StaticFileHandler {
 		root www;
+	}
+	path /static2 StaticFileHandler {
+		root pics;
 	}
 }

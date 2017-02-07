@@ -7,7 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
-
+#include <iostream>
 #include "request_handler_static.hpp"
 #include <fstream>
 #include <sstream>
@@ -21,45 +21,56 @@
 namespace http {
 namespace server {
 
-request_handler_static::request_handler_static(const std::string& static_file_root) {
-	static_file_root_ = static_file_root;
-}
+request_handler_static::request_handler_static(const server_options* server_options_) 
+  : server_options_(server_options_){}
 
 // Serve the static file that is requested
 void request_handler_static::handle_request(const request& req, reply& rep) {
+  // root on localhost containing desired files
+  std::string static_file_root_;
 
   // Decode url to path.
-  std::string request_path;
-  if (!url_decode(req.uri, request_path)) {
+  std::string request_string;
+  if (!url_decode(req.uri, request_string)) {
     rep = reply::stock_reply(reply::bad_request);
     return;
   }
 
-  std::string temp = "static";
-  request_path = request_path.substr(request_path.find(temp)+temp.length()); 
+  // gets the desired path
+  std::string request_path = request_string.substr(0, request_string.find('/', 1));
+  //first part of url is the path, as specified in config. Check map TODO:
+  if ( server_options_->static_files_map.find(request_path) == server_options_->static_files_map.end() ) {
+    // not found
+    std::cout << "PATH NOT FOUND; " << request_path << "\n"; //TODO: legit error handling
+  } else {
+    // found
+    static_file_root_ = server_options_->static_files_map.at(request_path);
+  }
+  //this string contains the actual path to the file.
+  std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
 
   // Request path must be absolute and not contain "..".
-  if (request_path.empty() || request_path[0] != '/'
-      || request_path.find("..") != std::string::npos) {
+  if (request_file.empty() || request_file[0] != '/'
+      || request_file.find("..") != std::string::npos) {
     rep = reply::stock_reply(reply::bad_request);
     return;
   }
 
   // If path ends in slash (i.e. is a directory) then add "index.html".
-  if (request_path[request_path.size() - 1] == '/') {
+  if (request_file[request_file.size() - 1] == '/') {
     request_path += "index.html";
   }
 
   // Determine the file extension.
-  std::size_t last_slash_pos = request_path.find_last_of("/");
-  std::size_t last_dot_pos = request_path.find_last_of(".");
+  std::size_t last_slash_pos = request_file.find_last_of("/");
+  std::size_t last_dot_pos = request_file.find_last_of(".");
   std::string extension;
   if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos) {
-    extension = request_path.substr(last_dot_pos + 1);
+    extension = request_file.substr(last_dot_pos + 1);
   }
 
   // Open the file to send back.
-  std::string full_path = static_file_root_ + request_path;
+  std::string full_path = static_file_root_ + request_file;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
     rep = reply::stock_reply(reply::not_found);
