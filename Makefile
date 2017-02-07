@@ -85,6 +85,13 @@ test:
 # 	gcov -r connection_manager.cpp > $(RESULTS_COVERAGE_DIR)/connection_manager_coverage
 # endif
 
+staticTest:
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	test/request_handler_static_test.cpp \
+	src/request_handler_static.cpp src/mime_types.cpp src/reply.cpp \
+	test/libgtest.a -o \
+	request_handler_static_test $(BOOST_FLAGS)
+
 coverage: CXXFLAGS+=-coverage
 coverage:
 		g++ $(CXXFLAGS) $(GTEST_IMPORT) \
