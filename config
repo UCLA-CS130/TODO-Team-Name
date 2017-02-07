@@ -2,6 +2,6 @@ server {
 	listen 8080;
 	path /echo EchoHandler;
 	path /static StaticFileHandler {
-		root static;
+		root www;
 	}
 }
