@@ -22,6 +22,9 @@ struct request;
 /// Handler for atatic file requests.
 class request_handler_static : public http::server::request_handler {
 public:
+  request_handler_static() {
+  	static_file_root_ = ".";
+  }
   request_handler_static(const std::string& static_file_location);
   /// Handle a request and produce an echo response.
   void handle_request(const request& req, reply& rep) override;
