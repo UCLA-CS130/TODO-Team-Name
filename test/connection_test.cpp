@@ -2,28 +2,28 @@
 #include "gtest/gtest.h"
 #include "connection.hpp"
 #include "connection_manager.hpp"
-#include "request_handler.hpp"
-
-
+#include "request_handler_static.hpp"
+#include "request_handler_echo.hpp"
 
 class ConnectionTest : public ::testing::Test {
 protected:
 	bool isSocketOpen() {
-        conn = new http::server::connection(io_service, manager_, handler_);
+        conn = new http::server::connection(io_service, manager_, request_handler_static_, request_handler_echo_);
         return conn->socket().is_open();
     }
     void startConn() {
-        conn = new http::server::connection(io_service, manager_, handler_);
+        conn = new http::server::connection(io_service, manager_, request_handler_static_, request_handler_echo_);
         conn->start();
     }
     void stopConn() {
-        conn = new http::server::connection(io_service, manager_, handler_);
+        conn = new http::server::connection(io_service, manager_, request_handler_static_, request_handler_echo_);
         conn->stop();
     }
     http::server::connection* conn;
     boost::asio::io_service io_service;
     http::server::connection_manager manager_; 
-    http::server::request_handler handler_;
+    http::server::request_handler_static request_handler_static_;
+    http::server::request_handler_echo request_handler_echo_;
 };
 
 TEST_F(ConnectionTest, SocketTest) {

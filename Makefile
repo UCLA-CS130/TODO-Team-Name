@@ -22,31 +22,41 @@ webserver: $(SRC_FILES)
 test: $(SRC_FILES) $(TEST_FILES)
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/server_test.cpp \
-	src/server.cpp src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp \
+	src/server.cpp src/connection.cpp src/connection_manager.cpp src/request_handler_echo.cpp \
+	src/request_handler_static.cpp src/reply.cpp src/request_parser.cpp src/mime_types.cpp  \
 	test/libgtest.a -o \
 	server_test $(BOOST_FLAGS)
 
+	# g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	# test/request_handler_test.cpp \
+	# src/reply.cpp src/request_handler.cpp \
+	# test/libgtest.a -o \
+	# request_handler_test $(BOOST_FLAGS)
+
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
-	test/request_handler_test.cpp \
-	src/reply.cpp src/request_handler.cpp \
+	test/request_parser_test.cpp \
+	src/request.hpp src/request_parser.cpp \
 	test/libgtest.a -o \
-	request_handler_test $(BOOST_FLAGS)
+	request_parser_test $(BOOST_FLAGS)
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/reply_test.cpp \
-	src/reply.cpp src/request_handler.cpp \
+	src/reply.cpp src/request.hpp src/request_handler_echo.cpp src/request_handler_static.cpp \
+	src/mime_types.cpp \
 	test/libgtest.a -o \
 	reply_test $(BOOST_FLAGS)
   
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
 	test/connection_test.cpp \
-	src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp \
+	src/connection.cpp src/connection_manager.cpp src/request_handler_static.cpp \
+	src/request_handler_echo.cpp src/reply.cpp src/mime_types.cpp src/request_parser.cpp \
 	test/libgtest.a -o \
 	connection_test $(BOOST_FLAGS)
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
 	test/connection_manager_test.cpp \
-	src/connection.cpp src/connection_manager.cpp src/request_handler.cpp src/reply.cpp \
+	src/connection.cpp src/connection_manager.cpp src/request_handler_echo.cpp \
+	src/request_handler_static.cpp src/mime_types.cpp src/reply.cpp src/request_parser.cpp \
 	test/libgtest.a -o \
 	connection_manager_test $(BOOST_FLAGS)
 
@@ -56,6 +66,7 @@ coverage: test
 	mkdir $(RESULTS_COVERAGE_DIR); \
 	./reply_test > $(RESULTS_TEST_DIR)/reply_test_info; \
 	./request_handler_test > $(RESULTS_TEST_DIR)/request_handler_test_info; \
+	./request_parser_test > $(RESULTS_TEST_DIR)/request_parser_test_info; \
 	./server_test > $(RESULTS_TEST_DIR)/server_test_info; \
 	./connection_test > $(RESULTS_TEST_DIR)/connection_test_info; \
 	./connection_manager_test > $(RESULTS_TEST_DIR)/connection_manager_test_info; \
