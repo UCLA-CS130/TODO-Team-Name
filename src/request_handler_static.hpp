@@ -12,20 +12,20 @@
 #define HTTP_REQUEST_HANDLER_STATIC_HPP
 
 #include "request_handler.hpp"
+#include "server_options.hpp"
+#include <map>
 
 namespace http {
 namespace server {
 
 struct reply;
 struct request;
+struct server_options;
 
 /// Handler for atatic file requests.
 class request_handler_static : public http::server::request_handler {
 public:
-  request_handler_static() {
-  	static_file_root_ = ".";
-  }
-  request_handler_static(const std::string& static_file_location);
+  request_handler_static(const server_options* server_options_);
   /// Handle a request and produce an echo response.
   void handle_request(const request& req, reply& rep) override;
 
@@ -33,8 +33,8 @@ private:
   /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
   static bool url_decode(const std::string& in, std::string& out);
 
-  /// The directory containing the files to be served.
-  std::string static_file_root_;
+  //pointer to server_options
+  const server_options* server_options_;
 };
 
 } // namespace server

@@ -16,15 +16,17 @@
 namespace http {
 namespace server {
 
-server::server(const std::string& address, const std::string& port, const std::string& static_file_root)
+server::server(const std::string& address, const server_options* server_options_)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    request_handler_static_(static_file_root),
-    request_handler_echo_() {
-
+    request_handler_static_(server_options_), 
+    request_handler_echo_(),
+    server_options_(server_options_) {
+  // Get the port
+  std::string port = server_options_->port;
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
   // provided all registration for the specified signal is made through Asio.

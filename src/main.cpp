@@ -10,34 +10,29 @@
 
 #include <iostream>
 #include <string>
+#include <map>
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "server.hpp"
 #include "nginx-configparser/config_parser.h"
+#include "server_options.hpp"
+#include <sys/stat.h>
 
-// Expected format of config file:
-// server {
-//   listen 8080;
-//   path /echo EchoHandler;
-//   path /static StaticFileHandler {
-//      root static;
-//   }
-// }
-
-struct server_options {
-  std::string port;
-  std::string static_file_root;
-  std::string echo_handler;
-  std::string static_handler;
-};
+namespace http{
+  namespace server{
+    struct server_options;
+  }
+}
 
 // Given a parsed config file, return a struct containing the config info
-void get_server_options(NginxConfig config, server_options *server_options_pointer) {
+void get_server_options(NginxConfig config, http::server::server_options *server_options_pointer) {
 
   server_options_pointer->port = "";
-  server_options_pointer->static_file_root = "";
   server_options_pointer->echo_handler = "";
-  server_options_pointer->static_handler = "";
+  //server_options_pointer->static_files_map;
+  //variables to be used when inserting into map.
+  std::string m_path;
+  std::string m_root;
 
   for (unsigned int i = 0; i < config.statements_.size(); i++) {
     std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
@@ -63,14 +58,15 @@ void get_server_options(NginxConfig config, server_options *server_options_point
             server_options_pointer->echo_handler = server_block_line_tokens.at(1);
           }
           else if (server_block_line_tokens.at(2) == "StaticFileHandler") {
-            server_options_pointer->static_handler = server_block_line_tokens.at(1);
+            m_path = server_block_line_tokens.at(1);
             // child block specifies location from which to serve static files
             std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = server_block_line->child_block_->statements_;
             if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
               && static_handler_statements.at(0)->tokens_.at(0) == "root") {
-              server_options_pointer->static_file_root = static_handler_statements.at(0)->tokens_.at(1);
+              m_root = static_handler_statements.at(0)->tokens_.at(1);
             }
-
+            //assign m_ variables to map
+            server_options_pointer->static_files_map[m_path] = m_root;
           }
         }
 
@@ -81,7 +77,7 @@ void get_server_options(NginxConfig config, server_options *server_options_point
 }
 
 // Parse the config file, handling error
-bool parse_config(char * config_file, server_options *server_options_pointer) {
+bool parse_config(char * config_file, http::server::server_options *server_options_pointer) {
   NginxConfigParser config_parser;
   NginxConfig config;
 
@@ -91,15 +87,9 @@ bool parse_config(char * config_file, server_options *server_options_pointer) {
 
   get_server_options(config, server_options_pointer);
   std::string port = server_options_pointer->port;
-  std::string static_file_root = server_options_pointer->static_file_root;
 
   if (port == "") {
     std::cerr << "Please specify a port.\n";
-    return false;
-  }
-
-  if (static_file_root == "") {
-    std::cerr << "Please specify a root directory from which to serve static files.\n";
     return false;
   }
 
@@ -110,21 +100,58 @@ bool parse_config(char * config_file, server_options *server_options_pointer) {
     return false;
   }
 
-  // TODO: check that static file root is an actual directory that exists?
+  //TODO: Possibly support different static handlers
+  
+  // NOTE: Boost filesystem is awful and from the stone age.
+  // If you want to try this code, compile using -lboost_filesystem and #include <boost/filesystem.hpp>.
+  // It doesnt work however, because boost uses c++98 strings instead of c++11 strings (I think)
+  // http://stackoverflow.com/questions/38807501/boostfilesystemexists-segfault-on-linux
+
+  // //loop through map of server options and make sure the root's exist
+  // for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+  //   //create a boost path out of suggested root
+  //   boost::filesystem::path root_dir(it->second);
+  //   if(!boost::filesystem::is_directory(root_dir)){ // true, directory exists
+  //     //directory does not exist
+  //     std::cerr << "Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
+  //     return false;
+  //   }
+  // }
+
+
+  //TODO: check other folders on local system maybe? so far all must be foward of .
+  //loop through map of server options and make sure the root's exist
+  struct stat sb;
+  std::string thePath;
+  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+    //create a boost path out of suggested root
+    thePath = "./" + it->second;
+    if(stat(thePath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
+      //directory exists
+    }
+    else{
+      std::cerr << "ERROR: Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
+      return false;
+    }
+  }
 
   return true;
 }
 
-void print_parsed_config(server_options *server_options_pointer) {
+void print_parsed_config(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
   std::cout << "port: " << server_options_pointer->port << "\n";
-  std::cout << "root for static files: " << server_options_pointer->static_file_root << "\n";
   std::cout << "path to use echo handler: " << server_options_pointer->echo_handler << "\n";
-  std::cout << "path to use static handler: " << server_options_pointer->static_handler << "\n";
+
+  
+  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+    std::cout << "static handler path: "<< it->first << " accesses root directory of: " << it->second << "\n";
+  }
   std::cout << "*******************************" << "\n";
 }
 
 int main(int argc, char* argv[]) {
+  http::server::server_options server_options_;
   try {
 
     // Check command line arguments.
@@ -134,22 +161,18 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize the server.
-    server_options server_options_;
     if (parse_config(argv[1], &server_options_)) {
 
       // for debugging
       print_parsed_config(&server_options_);
 
-      std::string port = server_options_.port;
-      std::string static_file_root = server_options_.static_file_root;
-      http::server::server s("0.0.0.0", port, static_file_root);
-      std::cerr << "Listening at port " << port << "\n";
+      http::server::server s("0.0.0.0", &server_options_);
+      std::cerr << "Listening at port " << server_options_.port << "\n";
       // Run the server until stopped.
       s.run();
     }
     else {
-      std::cerr << "ERROR: Could not parse config file.\n" <<
-      "Please check that your port number is defined correctly and try again.\n";
+      std::cerr << "ERROR: Could not parse config file.\n";
     }
 
   } catch (std::exception& e) {
