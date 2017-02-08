@@ -14,6 +14,7 @@ RESULTS_COVERAGE_DIR=results-coverage
 
 # Test file dependencies
 REQUEST_HANDLER_ECHO_DEPENDENCIES=src/request_handler_echo.cpp src/reply.cpp src/request.hpp
+REQUEST_HANDLER_STATIC_DEPENDENCIES=src/request_handler_static.cpp src/mime_types.cpp src/reply.cpp
 SERVER_DEPENDENCIES=src/server.cpp src/connection.cpp src/connection_manager.cpp src/request_handler_echo.cpp src/request_handler_static.cpp src/reply.cpp src/request_parser.cpp src/mime_types.cpp
 REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp
 REPLY_DEPENDENCIES=src/reply.cpp src/request.hpp src/request_handler_echo.cpp src/request_handler_static.cpp src/mime_types.cpp
@@ -29,6 +30,10 @@ test:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/request_handler_echo_test.cpp $(REQUEST_HANDLER_ECHO_DEPENDENCIES) \
 	test/libgtest.a -o request_handler_echo_test $(BOOST_FLAGS)
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	test/request_handler_static_test.cpp $(REQUEST_HANDLER_STATIC_DEPENDENCIES) \
+	test/libgtest.a -o request_handler_static_test $(BOOST_FLAGS)
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/server_test.cpp $(SERVER_DEPENDENCIES) \
@@ -50,12 +55,6 @@ test:
 	test/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
 	test/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
 
-	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
-	test/request_handler_static_test.cpp \
-	src/request_handler_static.cpp src/mime_types.cpp src/reply.cpp \
-	test/libgtest.a -o \
-	request_handler_static_test $(BOOST_FLAGS)
-
 coverage: CXXFLAGS+=-coverage
 coverage:
 	mkdir $(RESULTS_TEST_DIR)
@@ -66,6 +65,12 @@ coverage:
 	test/libgtest.a -o request_handler_echo_test $(BOOST_FLAGS)
 	./request_handler_echo_test > $(RESULTS_TEST_DIR)/request_handler_echo_test_info
 	gcov -r request_handler_echo.cpp > $(RESULTS_COVERAGE_DIR)/request_handler_echo_coverage
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	test/request_handler_static_test.cpp $(REQUEST_HANDLER_STATIC_DEPENDENCIES) \
+	test/libgtest.a -o request_handler_static_test $(BOOST_FLAGS)
+	./request_handler_static_test > $(RESULTS_TEST_DIR)/request_handler_static_test_info
+	gcov -r request_handler_static.cpp > $(RESULTS_COVERAGE_DIR)/request_handler_static_coverage
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/server_test.cpp $(SERVER_DEPENDENCIES) \
