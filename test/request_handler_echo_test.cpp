@@ -4,21 +4,10 @@
 #include "request_handler_echo.hpp"
 #include "reply.hpp"
 #include "request.hpp"
-// struct request {
-//   std::string method;
-//   std::string uri;
-//   int http_version_major;
-//   int http_version_minor;
-//   std::vector<header> headers;
-//   std::string full_header;
-//   enum request_type_options {
-//     echo = 0,
-//     static_file = 1
-//   } request_type;
-// };
+
 class RequestHandlerEcho : public ::testing::Test {
 protected:
-	void HandleIt() {
+	void HandleEchoRequest() {
 		handler.handle_request(req, rep);
 	}
 	http::server::request_handler_echo handler;
@@ -27,76 +16,35 @@ protected:
 };
 
 TEST_F(RequestHandlerEcho, SimpleRequest) {
-	std::string s = "Echo... echo... echo.";
-	req.full_header = s;
-	HandleIt();
+	std::string simple_request = "testing";
+	req.full_header = simple_request;
+	HandleEchoRequest();
 	EXPECT_EQ(rep.status, http::server::reply::ok);
-	EXPECT_EQ(rep.content, s);
-
-	EXPECT_EQ(rep.headers.size(), 2);
 	EXPECT_EQ(rep.headers[0].name, "Content-Length");
-	EXPECT_EQ(rep.headers[0].value, std::to_string(s.length()));
-	EXPECT_EQ(rep.headers[1].name, "Content-Type");
-   	EXPECT_EQ(rep.headers[1].value, "text/plain");
+ 	EXPECT_EQ(rep.headers[0].value, std::to_string(simple_request.length()));
+  	EXPECT_EQ(rep.headers[1].name, "Content-Type");
+  	EXPECT_EQ(rep.headers[1].value, "text/plain");
 }
 
 TEST_F(RequestHandlerEcho, EmptyRequest) {
-	std::string s = "";
-	rep.content = s;
-	HandleIt();
+	HandleEchoRequest();
 	EXPECT_EQ(rep.status, http::server::reply::ok);
-	EXPECT_EQ(rep.content, s);
-
-	EXPECT_EQ(rep.headers.size(), 2);
 	EXPECT_EQ(rep.headers[0].name, "Content-Length");
-	EXPECT_EQ(rep.headers[0].value, std::to_string(s.length()));
-	EXPECT_EQ(rep.headers[1].name, "Content-Type");
+ 	EXPECT_EQ(rep.headers[0].value, "0");
+ 	EXPECT_EQ(rep.headers[1].name, "Content-Type");
   	EXPECT_EQ(rep.headers[1].value, "text/plain");
 }
 
 TEST_F(RequestHandlerEcho, BigRequest) {
-	std::string s = "EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho"
-	"EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho";
-	
-	rep.content = s;
-	HandleIt();
+	std::string big_request = "";
+	for (int i = 0; i < 50; i++) {
+		big_request += "EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho";
+	}
+	req.full_header = big_request;
+	HandleEchoRequest();
 	EXPECT_EQ(rep.status, http::server::reply::ok);
-	EXPECT_NE(rep.content, s);
-
-	EXPECT_EQ(rep.headers.size(), 2);
 	EXPECT_EQ(rep.headers[0].name, "Content-Length");
-	EXPECT_NE(rep.headers[0].value, std::to_string(s.length()));
-	EXPECT_EQ(rep.headers[1].name, "Content-Type");
+ 	EXPECT_EQ(rep.headers[0].value, std::to_string(big_request.length()));
+  	EXPECT_EQ(rep.headers[1].name, "Content-Type");
   	EXPECT_EQ(rep.headers[1].value, "text/plain");
 }

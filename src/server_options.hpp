@@ -24,7 +24,6 @@ struct server_options {
 
   // Key of the map is the path in url, value is the root on localhost
   std::map<std::string, std::string> static_files_map;
-
 };
 
 } // namespace server
