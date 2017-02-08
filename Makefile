@@ -15,7 +15,7 @@ RESULTS_COVERAGE_DIR=results-coverage
 # Test file dependencies
 REQUEST_HANDLER_ECHO_DEPENDENCIES=src/request_handler_echo.cpp src/reply.cpp src/request.hpp
 SERVER_DEPENDENCIES=src/server.cpp src/connection.cpp src/connection_manager.cpp src/request_handler_echo.cpp src/request_handler_static.cpp src/reply.cpp src/request_parser.cpp src/mime_types.cpp
-REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp src/request.hpp
+REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp
 REPLY_DEPENDENCIES=src/reply.cpp src/request.hpp src/request_handler_echo.cpp src/request_handler_static.cpp src/mime_types.cpp
 CONNECTION_DEPENDENCIES=src/connection.cpp src/connection_manager.cpp src/request_handler_static.cpp src/request_handler_echo.cpp src/reply.cpp src/mime_types.cpp src/request_parser.cpp
 
@@ -94,7 +94,7 @@ coverage:
 integration:
 	./integration_test.sh
 
-all-tests:
+run-tests:
 	./run_tests.sh
 
 clean:
