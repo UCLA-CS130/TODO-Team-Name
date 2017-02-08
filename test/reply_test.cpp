@@ -6,38 +6,34 @@
 #include "reply.hpp"
 #include "request.hpp"
 
+TEST(StockReplyTest, Ok){
+	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::ok);
+	std::string expectedHeader = "";
+	EXPECT_EQ(reply_.content, expectedHeader);
+}
+
+TEST(StockReplyTest, Created){
+	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::created);
+	std::string expectedHeader = "<html><head><title>Created</title></head><body><h1>201 Created</h1></body></html>";
+	EXPECT_EQ(reply_.content, expectedHeader);
+}
+
+TEST(StockReplyTest, Accepted){
+	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::accepted);
+	std::string expectedHeader = "<html><head><title>Accepted</title></head><body><h1>202 Accepted</h1></body></html>";
+	EXPECT_EQ(reply_.content, expectedHeader);
+}
+
+TEST(StockReplyTest, NoContent){
+	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::no_content);
+	std::string expectedHeader = "<html><head><title>No Content</title></head><body><h1>204 Content</h1></body></html>";
+	EXPECT_EQ(reply_.content, expectedHeader);
+}
+
 TEST(StockReplyTest, BadRequest){
 	http::server::reply reply_ = http::server::reply::stock_reply(http::server::reply::bad_request);
 	std::string expectedHeader = "<html><head><title>Bad Request</title></head><body><h1>400 Bad Request</h1></body></html>";
 	EXPECT_EQ(reply_.content, expectedHeader);
 }
 
-class ReplyTest : public ::testing::Test {
-protected:
-	void HandleEchoRequest() {
-		request_handler_echo_.handle_request(req, rep);
-	}
-	http::server::request_handler_echo request_handler_echo_;
-	http::server::reply rep;
-	http::server::request req;
-};
-
-TEST_F(ReplyTest, HeadersCheck) {
-	req.full_header = "testing";
-	HandleEchoRequest();
-	EXPECT_EQ(rep.headers[0].name, "Content-Length");
- 	EXPECT_EQ(rep.headers[0].value, "7");
-  	EXPECT_EQ(rep.headers[1].name, "Content-Type");
-  	EXPECT_EQ(rep.headers[1].value, "text/plain");
-}
-
-TEST_F(ReplyTest, EmptyRequest) {
-	HandleEchoRequest();
-	EXPECT_EQ(rep.headers[0].name, "Content-Length");
- 	EXPECT_EQ(rep.headers[0].value, "0");
- 	EXPECT_EQ(rep.headers[1].name, "Content-Type");
-  	EXPECT_EQ(rep.headers[1].value, "text/plain");
-
-}
-
-// TODO: test reply from static requests
+// TODO: finish rest of stock replies
