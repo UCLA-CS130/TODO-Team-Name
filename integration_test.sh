@@ -1,3 +1,4 @@
+#!/bin/bash
 # Build the binary
 make clean
 make
@@ -20,15 +21,15 @@ curl -s localhost:8080/static2/mario.jpeg > test_output_static2_jpeg
 
 # Verify the response from the server works as expected
 diff expected_echo_output test_output_echo > diff_echo_output
-EXIT_STATUS=$?
+EXIT_STATUS+=$?
 diff www/default.html test_output_static1 > diff_static1_output
-EXIT_STATUS=$?
+EXIT_STATUS+=$?
 diff pics/ducks.jpg test_output_static2_jpg > diff_static2_jpg_output
-EXIT_STATUS=$?
+EXIT_STATUS+=$?
 diff pics/giphy.gif test_output_static2_gif > diff_static2_gif_output
-EXIT_STATUS=$?
+EXIT_STATUS+=$?
 diff pics/mario.jpeg test_output_static2_jpeg > diff_static2_jpeg_output
-EXIT_STATUS=$?
+EXIT_STATUS+=$?
 
 # Indicate success or failure with an appropriate exit code
 # Diff returns 0 if there are no differences, 1 if there are,
