@@ -50,7 +50,6 @@ test:
 	test/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
 	test/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
 
-staticTest:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	test/request_handler_static_test.cpp \
 	src/request_handler_static.cpp src/mime_types.cpp src/reply.cpp \
