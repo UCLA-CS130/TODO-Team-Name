@@ -2,12 +2,13 @@
 #include "gtest/gtest.h"
 #include "connection.hpp"
 #include "connection_manager.hpp"
-#include "request_handler.hpp"
+#include "request_handler_echo.hpp"
+#include "request_handler_static.hpp"
 
 class ConnectionManagerTest : public ::testing::Test {
 protected:
     void makeConn() {
-        conn = new http::server::connection(io_service, manager_, handler_);
+        conn = new http::server::connection(io_service, manager_, request_handler_static_, request_handler_echo_);
     }
     void startConnMan() {
         manager_.start(conn->shared_from_this());
@@ -21,7 +22,8 @@ protected:
     http::server::connection* conn;
     boost::asio::io_service io_service;
     http::server::connection_manager manager_; 
-    http::server::request_handler handler_;
+    http::server::request_handler_static request_handler_static_;
+    http::server::request_handler_echo request_handler_echo_;
 };
 
 TEST_F(ConnectionManagerTest, SimpleConnection) {
