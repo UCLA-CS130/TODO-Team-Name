@@ -26,10 +26,6 @@ struct request {
   int http_version_minor;
   std::vector<header> headers;
   std::string full_header;
-  enum request_type_options {
-    echo = 0,
-    static_file = 1
-  } request_type;
 };
 
 } // namespace server

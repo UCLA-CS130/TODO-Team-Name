@@ -28,7 +28,7 @@ namespace http{
 void get_server_options(NginxConfig config, http::server::server_options *server_options_pointer) {
 
   server_options_pointer->port = "";
-  server_options_pointer->echo_handler = "";
+  server_options_pointer->echo_handler_path = "";
   //server_options_pointer->static_files_map;
   //variables to be used when inserting into map.
   std::string m_path;
@@ -55,7 +55,7 @@ void get_server_options(NginxConfig config, http::server::server_options *server
         if (server_block_line_tokens.size() == 3 && server_block_line_tokens.at(0) == "path") {
 
           if (server_block_line_tokens.at(2) == "EchoHandler") {
-            server_options_pointer->echo_handler = server_block_line_tokens.at(1);
+            server_options_pointer->echo_handler_path = server_block_line_tokens.at(1);
           }
           else if (server_block_line_tokens.at(2) == "StaticFileHandler") {
             m_path = server_block_line_tokens.at(1);
@@ -141,7 +141,7 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
 void print_parsed_config(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
   std::cout << "port: " << server_options_pointer->port << "\n";
-  std::cout << "path to use echo handler: " << server_options_pointer->echo_handler << "\n";
+  std::cout << "path to use echo handler: " << server_options_pointer->echo_handler_path << "\n";
 
   
   for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {

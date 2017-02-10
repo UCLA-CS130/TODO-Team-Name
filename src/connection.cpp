@@ -48,19 +48,14 @@ void connection::handle_read(const boost::system::error_code& e,
     boost::tribool result;
     boost::tie(result, boost::tuples::ignore) = request_parser_.parse(request_, buffer_.data(), buffer_.data() + bytes_transferred);
 
-    //TODO: use new class
     if (result) {
-      if (request_.uri == "/echo"){ 
+      if (request_.uri == request_handler_echo_.GetPath()){      //we want echo files
         request_handler_echo_.handle_request(request_, reply_);
         boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
       }
-      else{   //we want static files
-        //theres a map of possible paths
-
-        
-
+      else{                                                       //we want static files
         request_handler_static_.handle_request(request_, reply_);
         boost::asio::async_write(socket_, reply_.to_buffers(),
           boost::bind(&connection::handle_write, shared_from_this(),
