@@ -22,8 +22,8 @@ server::server(const std::string& address, const server_options* server_options_
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    request_handler_static_(server_options_), 
-    request_handler_echo_(),
+    request_handler_static_(server_options_),                   //Static needs server options to access map for multiple paths
+    request_handler_echo_(server_options_->echo_handler_path),  //This is assuming there will be only one echo path
     server_options_(server_options_) {
   // Get the port
   std::string port = server_options_->port;

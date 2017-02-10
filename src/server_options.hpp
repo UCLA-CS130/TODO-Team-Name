@@ -20,7 +20,7 @@ namespace server {
 // Holds the parsed config server options
 struct server_options {
   std::string port;
-  std::string echo_handler;
+  std::string echo_handler_path;
 
   // Key of the map is the path in url, value is the root on localhost
   std::map<std::string, std::string> static_files_map;
