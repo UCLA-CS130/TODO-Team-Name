@@ -14,7 +14,7 @@ path /static2 StaticFileHandler { root pics; } }" >> test_config
 # Send a request to the server using curl
 echo "Sending a curl request"
 curl -i -s localhost:8080/echo > test_output_echo
-curl -s localhost:8080/static1/default.html > test_output_static1
+curl -s localhost:8080/static1/index.html > test_output_static1
 curl -s localhost:8080/static2/ducks.jpg > test_output_static2_jpg
 curl -s localhost:8080/static2/giphy.gif > test_output_static2_gif
 curl -s localhost:8080/static2/mario.jpeg > test_output_static2_jpeg
@@ -22,7 +22,7 @@ curl -s localhost:8080/static2/mario.jpeg > test_output_static2_jpeg
 # Verify the response from the server works as expected
 diff expected_echo_output test_output_echo > diff_echo_output
 EXIT_STATUS+=$?
-diff www/default.html test_output_static1 > diff_static1_output
+diff www/index.html test_output_static1 > diff_static1_output
 EXIT_STATUS+=$?
 diff pics/ducks.jpg test_output_static2_jpg > diff_static2_jpg_output
 EXIT_STATUS+=$?
