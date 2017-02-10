@@ -9,46 +9,68 @@
 
 class RequestHandlerStatic : public ::testing::Test {
 protected:
-	void AddOptions(std::string path, std::string root) {
-		server_options_.static_files_map[path] = root;
+	void HandleStaticRequest() {
+		http::server::request_handler_static handler(&server_options_);
+		handler.handle_request(req, rep);
 	}
 	http::server::server_options server_options_; 
 	http::server::request req;
 	http::server::reply rep;
 };
 
-TEST_F(RequestHandlerStatic, EmptyConstructTest) {
-	EXPECT_NO_THROW(http::server::request_handler_static handler(&server_options_));
-}
-
-TEST_F(RequestHandlerStatic, BadRequestTest) {
-	http::server::request_handler_static handler(&server_options_);
-	req.uri = "thisWontWork.jpg";
-	handler.handle_request(req, rep);
-	EXPECT_EQ(rep.content, "<html>"
-  "<head><title>Bad Request</title></head>"
-  "<body><h1>400 Bad Request</h1></body>"
-  "</html>");
-}
-
-TEST_F(RequestHandlerStatic, URLNotFoundTest) {
-	http::server::request_handler_static handler(&server_options_);
-	req.uri = "/static1/thisWontWork.jpg";
-	handler.handle_request(req, rep);
-	EXPECT_EQ(rep.content, "<html><head><title>Not Found</title></head><body><h1>404 Not Found</h1></body></html>");
-}
-
-TEST_F(RequestHandlerStatic, IndexTest) {
+TEST_F(RequestHandlerStatic, SimpleRequest) {
 	server_options_.static_files_map["/static1"] = "www";
-	http::server::request_handler_static handler(&server_options_);
 	req.uri = "/static1/";
-	handler.handle_request(req, rep);
-	EXPECT_EQ(rep.content, "<!DOCTYPE html>\n<html>\n<body>\n\n<h1>This is default.html</h1>\n\n<p>The webserver successfully served this static file YAY</p>\n\n</body>\n</html>\n");
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::ok);
+	EXPECT_EQ(rep.content, "<!DOCTYPE html>\n"
+		"<html>\n<body>\n\n<h1>This is default.html</h1>\n\n"
+		"<p>The webserver successfully served this static file YAY</p>\n\n"
+		"</body>\n</html>\n");
 }
 
-// TEST_F(RequestHandlerStatic, URLDecodeTest) {
-// 	http::server::request_handler_static handler(&server_options_);
-// 	std::string output;
+TEST_F(RequestHandlerStatic, EmptyRequest) {
+	EXPECT_NO_THROW(HandleStaticRequest());
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+}
 
-// }
+TEST_F(RequestHandlerStatic, BadRequest) {
+	req.uri = "thisWontWork.jpg";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+}
 
+TEST_F(RequestHandlerStatic, URLNotFound) {
+	req.uri = "/static1/thisWontWork.jpg";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::not_found);
+}
+
+TEST_F(RequestHandlerStatic, NoFileExtension) {
+	req.uri = "a";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+}
+
+TEST_F(RequestHandlerStatic, URLPoorlyFormed) {
+	req.uri = "%";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+
+	req.uri = "%20";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+
+	req.uri = "+";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::bad_request);
+}
+
+TEST_F(RequestHandlerStatic, EscapeSpace) {
+	server_options_.static_files_map["/static1"] = "www";
+	req.uri = "/static1/test%20space.html";
+	HandleStaticRequest();
+	EXPECT_EQ(rep.status, http::server::reply::ok);
+	EXPECT_EQ(rep.content, "<!DOCTYPE html><html><body>"
+		"<h1>Testing space handling</h1></body></html>\n");
+}

@@ -46,12 +46,12 @@ void get_server_options(NginxConfig config, http::server::server_options *server
         std::shared_ptr<NginxConfigStatement> server_block_line = server_statements.at(j);
         std::vector<std::basic_string<char> > server_block_line_tokens = server_block_line->tokens_;
 
-        // port
+        // Port
         if (server_block_line_tokens.size() == 2 && server_block_line_tokens.at(0) == "listen") {
           server_options_pointer->port = server_block_line_tokens.at(1);
         }
 
-        // specified paths for whether to return an echo statement or static file
+        // Specified paths for whether to return an echo statement or static file
         if (server_block_line_tokens.size() == 3 && server_block_line_tokens.at(0) == "path") {
 
           if (server_block_line_tokens.at(2) == "EchoHandler") {
@@ -59,13 +59,13 @@ void get_server_options(NginxConfig config, http::server::server_options *server
           }
           else if (server_block_line_tokens.at(2) == "StaticFileHandler") {
             m_path = server_block_line_tokens.at(1);
-            // child block specifies location from which to serve static files
+            // Child block specifies location from which to serve static files
             std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = server_block_line->child_block_->statements_;
             if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
               && static_handler_statements.at(0)->tokens_.at(0) == "root") {
               m_root = static_handler_statements.at(0)->tokens_.at(1);
             }
-            //assign m_ variables to map
+            // Assign m_ variables to map
             server_options_pointer->static_files_map[m_path] = m_root;
           }
         }
@@ -124,10 +124,10 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
   struct stat sb;
   std::string thePath;
   for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
-    //create a boost path out of suggested root
+    // Create a boost path out of suggested root
     thePath = "./" + it->second;
     if(stat(thePath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
-      //directory exists
+      // Directory exists
     }
     else{
       std::cerr << "ERROR: Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
