@@ -8,7 +8,7 @@ GMOCK_PATH=nginx-configparser/googletest/googlemock
 GTEST_IMPORT=-I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc
 GMOCK_IMPORT=-I$(GMOCK_PATH)/include
 TEST_FILES=test/*.cpp
-BOOST_FLAGS=-lpthread -lboost_system -L$(BOOST_PATH)
+BOOST_FLAGS=-lpthread -lboost_system
 RESULTS_TEST_DIR=results-unit-tests
 RESULTS_COVERAGE_DIR=results-coverage
 
@@ -23,8 +23,7 @@ CONNECTION_DEPENDENCIES=src/connection.cpp src/connection_manager.cpp src/reques
 all: webserver 
 
 webserver: $(SRC_FILES)
-	g++ $(CXXFLAGS) -I$(BOOST_PATH) -I. $(SRC_FILES) -o \
-	webserver $(BOOST_FLAGS)
+	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
 
 test:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \

@@ -2,13 +2,6 @@
 
 A full HTTP web server, from the [boost documentation](http://www.boost.org/doc/libs/1_53_0/doc/html/boost_asio/examples.html). This code is an adapted version of the [HTTP server](http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/examples/cpp11_examples.html) example.
 
-### Getting started
-Set the `BOOST_PATH` environment variable to the location where you downloaded Boost.
-For example:
-```
-export BOOST_PATH=~/Desktop/TODO-Team-Name/boost_1_63_0
-```
-
 ### Usage
 Edit `config` to define the port on which you want the server to run. Run server using:
 ```

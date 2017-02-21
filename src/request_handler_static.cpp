@@ -7,6 +7,7 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 //
+
 #include <iostream>
 #include "request_handler_static.hpp"
 #include <fstream>
@@ -39,12 +40,12 @@ void request_handler_static::handle_request(const request& req, reply& rep) {
   // gets the desired path
   std::string request_path = request_string.substr(0, request_string.find('/', 1));
   //first part of url is the path, as specified in config. Check map TODO:
-  if ( server_options_->static_files_map.find(request_path) == server_options_->static_files_map.end() ) {
+  if ( server_options_->static_handlers.find(request_path) == server_options_->static_handlers.end() ) {
     // not found
     std::cout << "PATH NOT FOUND; " << request_path << "\n"; //TODO: legit error handling
   } else {
     // found
-    static_file_root_ = server_options_->static_files_map.at(request_path);
+    static_file_root_ = server_options_->static_handlers.at(request_path);
   }
   //this string contains the actual path to the file.
   std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
