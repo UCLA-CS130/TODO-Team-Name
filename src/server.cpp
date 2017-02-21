@@ -22,9 +22,20 @@ server::server(const std::string& address, const server_options* server_options_
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    request_handler_static_(server_options_),                     // TODO: refactor this
-    request_handler_echo_(server_options_->echo_handlers.at(0)),  // TODO: support multiple echo handlers
     server_options_(server_options_) {
+
+  // Initialize request handlers
+  for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
+    std::string uri_prefix = server_options_->echo_handlers.at(i);
+    // TODO: error handling based on the value of Status
+    RequestHandler* handler_ = new RequestHandlerEcho();
+    NginxConfig config;
+    handler_->Init(uri_prefix, config);
+    handlers_[uri_prefix] = handler_;
+  }
+
+  // TODO: Initialize static and default handlers
+
   // Get the port
   std::string port = server_options_->port;
   // Register to handle the signals that indicate when the server should exit.
@@ -49,22 +60,6 @@ server::server(const std::string& address, const server_options* server_options_
   start_accept();
 }
 
-bool server::isValid(const std::string& address, const std::string& port){
-  if (port == "") {
-    std::cerr << "Please specify a port.\n";
-    return false;
-  }
-
-  // Port number must be a valid number
-  int port_as_num = std::stoi(port);
-  if (port_as_num > 65535 || port_as_num < 0) {
-    std::cerr << "Port must be a valid number ranging from 0 to 65535.\n";
-    return false;
-  }
-
-  return true;
-}
-
 void server::run() {
   // The io_service::run() call will block until all asynchronous operations
   // have finished. While the server is running, there is always at least one
@@ -75,7 +70,7 @@ void server::run() {
 
 void server::start_accept() {
   new_connection_.reset(new connection(io_service_,
-        connection_manager_, request_handler_static_, request_handler_echo_));
+        connection_manager_, handlers_, default_handler_));
   acceptor_.async_accept(new_connection_->socket(),
       boost::bind(&server::handle_accept, this,
         boost::asio::placeholders::error));

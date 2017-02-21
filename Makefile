@@ -1,5 +1,5 @@
 # Building the server
-CXXFLAGS=-std=c++0x -Wall -Werror
+CXXFLAGS=-std=c++11 -Wall -Werror
 SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
 
 # Running unit tests
