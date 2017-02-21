@@ -18,8 +18,8 @@
 #include "server_options.hpp"
 #include <sys/stat.h>
 
-namespace http{
-  namespace server{
+namespace http {
+  namespace server {
     struct server_options;
   }
 }
@@ -28,51 +28,44 @@ namespace http{
 void get_server_options(NginxConfig config, http::server::server_options *server_options_pointer) {
 
   server_options_pointer->port = "";
-  server_options_pointer->echo_handler_path = "";
-  //server_options_pointer->static_files_map;
-  //variables to be used when inserting into map.
   std::string m_path;
-  std::string m_root;
 
+  // Iterate over statements in parsed config.
   for (unsigned int i = 0; i < config.statements_.size(); i++) {
-    std::shared_ptr<NginxConfigStatement> statement = config.statements_.at(i);
+    std::shared_ptr<NginxConfigStatement> config_line = config.statements_.at(i);
+    std::vector<std::string> statement = config_line->tokens_;
 
-    // Look for a server block.
-    if (statement->tokens_.size() == 1 && statement->tokens_.at(0) == "server") {
-      std::vector<std::shared_ptr<NginxConfigStatement>> server_statements = statement->child_block_->statements_;
 
-      // Iterate over statements in server block, setting all config options.
-      for (unsigned int j = 0; j < server_statements.size(); j++) {
-        std::shared_ptr<NginxConfigStatement> server_block_line = server_statements.at(j);
-        std::vector<std::basic_string<char> > server_block_line_tokens = server_block_line->tokens_;
+    // Port
+    if (statement.size() == 2 && statement.at(0) == "port") {
+      server_options_pointer->port = statement.at(1);
+    }
 
-        // Port
-        if (server_block_line_tokens.size() == 2 && server_block_line_tokens.at(0) == "listen") {
-          server_options_pointer->port = server_block_line_tokens.at(1);
-        }
+    // Handlers
+    if (statement.size() == 3 && statement.at(0) == "path") {
 
-        // Specified paths for whether to return an echo statement or static file
-        if (server_block_line_tokens.size() == 3 && server_block_line_tokens.at(0) == "path") {
+      // Echo
+      if (statement.at(2) == "EchoHandler") {
+        server_options_pointer->echo_handlers.push_back(statement.at(1));
+      }
 
-          if (server_block_line_tokens.at(2) == "EchoHandler") {
-            server_options_pointer->echo_handler_path = server_block_line_tokens.at(1);
-          }
-          else if (server_block_line_tokens.at(2) == "StaticFileHandler") {
-            m_path = server_block_line_tokens.at(1);
-            // Child block specifies location from which to serve static files
-            std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = server_block_line->child_block_->statements_;
-            if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
-              && static_handler_statements.at(0)->tokens_.at(0) == "root") {
-              m_root = static_handler_statements.at(0)->tokens_.at(1);
-            }
-            // Assign m_ variables to map
-            server_options_pointer->static_files_map[m_path] = m_root;
+      // Static
+      else if (statement.at(2) == "StaticHandler") {
+        std::vector<std::shared_ptr<NginxConfigStatement>> child_statements = config_line->child_block_->statements_;
+        if (child_statements.size() > 0) {
+          std::shared_ptr<NginxConfigStatement> child_statement_line = child_statements.at(0);
+          std::vector<std::string> child_statement = child_statement_line->tokens_;
+          if (child_statement.size() == 2 && child_statement.at(0) == "root") {
+            server_options_pointer->static_handlers[statement.at(1)] = child_statement.at(1);
           }
         }
-
       }
     }
-    return; // return when found server block
+
+    // Default
+    if (statement.size() == 2 && statement.at(0) == "default") {
+      server_options_pointer->default_handler = statement.at(1);
+    }
   }
 }
 
@@ -100,33 +93,16 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
     return false;
   }
 
-  //TODO: Possibly support different static handlers
-  
-  // NOTE: Boost filesystem is awful and from the stone age.
-  // If you want to try this code, compile using -lboost_filesystem and #include <boost/filesystem.hpp>.
-  // It doesnt work however, because boost uses c++98 strings instead of c++11 strings (I think)
-  // http://stackoverflow.com/questions/38807501/boostfilesystemexists-segfault-on-linux
-
-  // //loop through map of server options and make sure the root's exist
-  // for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
-  //   //create a boost path out of suggested root
-  //   boost::filesystem::path root_dir(it->second);
-  //   if(!boost::filesystem::is_directory(root_dir)){ // true, directory exists
-  //     //directory does not exist
-  //     std::cerr << "Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
-  //     return false;
-  //   }
-  // }
-
-
-  //TODO: check other folders on local system maybe? so far all must be foward of .
-  //loop through map of server options and make sure the root's exist
+  // Loop through map of server options and make sure the roots exist
   struct stat sb;
-  std::string thePath;
-  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
+  std::string try_path;
+  std::map<std::string, std::string> static_handlers = server_options_pointer->static_handlers;
+
+
+  for (auto it = static_handlers.begin(); it != static_handlers.end(); ++it) {
     // Create a boost path out of suggested root
-    thePath = "./" + it->second;
-    if(stat(thePath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
+    try_path = "./" + it->second;
+    if(stat(try_path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
       // Directory exists
     }
     else{
@@ -140,13 +116,20 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
 
 void print_parsed_config(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
-  std::cout << "port: " << server_options_pointer->port << "\n";
-  std::cout << "path to use echo handler: " << server_options_pointer->echo_handler_path << "\n";
+  std::string port = server_options_pointer->port;
+  std::vector<std::string> echo_handlers = server_options_pointer->echo_handlers;
+  std::map<std::string, std::string> static_handlers = server_options_pointer->static_handlers;
 
-  
-  for(auto it = server_options_pointer->static_files_map.begin(); it != server_options_pointer->static_files_map.end(); ++it) {
-    std::cout << "static handler path: "<< it->first << " accesses root directory of: " << it->second << "\n";
+  std::cout << "Port: " << port << "\n";
+
+  for (unsigned int i = 0; i < echo_handlers.size(); i++) {
+    std::cout << "Echo Handler " << echo_handlers.at(i) << "\n";
   }
+
+  for (auto it = static_handlers.begin(); it != static_handlers.end(); ++it) {
+    std::cout << "Static Handler "<< it->first << " accesses root " << it->second << "\n";
+  }
+
   std::cout << "*******************************" << "\n";
 }
 
@@ -176,7 +159,7 @@ int main(int argc, char* argv[]) {
     }
 
   } catch (std::exception& e) {
-    std::cerr << "exception: " << e.what() << "\n";
+    std::cerr << "Exception: " << e.what() << "\n";
   }
 
   return 0;
