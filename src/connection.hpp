@@ -17,6 +17,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <map>
+#include <vector>
+#include <deque>
+#include <string>
 #include "response.hpp"
 #include "request.hpp"
 #include "request_handler_echo.hpp"
@@ -57,6 +60,18 @@ private:
   /// Handle completion of a write operation.
   void handle_write(const boost::system::error_code& e);
 
+  /// Fill buffer with null bytes
+  void clearBuffer();
+
+  //explodes string into vector
+  std::deque<std::string> splitUri(std::string uri);
+
+  //decides which handler to use
+  RequestHandler* chooseHandler();
+
+  //determines longest matching substring
+  int longestSubstring(std::deque<std::string> req, std::deque<std::string> handler);
+
   /// Socket for the connection.
   boost::asio::ip::tcp::socket socket_;
 
@@ -70,7 +85,8 @@ private:
   RequestHandler* default_handler_;
 
   /// Buffer for incoming data.
-  std::array<char, 1024> buffer_;
+  enum { BUF_SIZE = 8192 };
+  char buffer_[BUF_SIZE];
 
   /// The incoming request.
   std::unique_ptr<Request> request_;
