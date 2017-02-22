@@ -40,14 +40,14 @@ server::server(const std::string& address, const server_options* server_options_
     std::string uri_prefix = it->first;
     NginxConfig* config = it->second;
     //Create handler
-    RequestHandler* handler_ = new request_handler_static();
+    RequestHandler* handler_ = new StaticHandler();
     handler_->Init(uri_prefix, *config);
     handlers_[uri_prefix] = handler_;
   }
 
   // TODO: change how this works
   // Initialize default handler
-  RequestHandler* handler_ = new RequestHandlerNotFound();
+  RequestHandler* handler_ = new NotFoundHandler();
   NginxConfig config;
   handler_->Init("", config);
   default_handler_ = handler_;
