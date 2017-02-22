@@ -13,17 +13,20 @@
 #include <boost/bind.hpp>
 #include "connection_manager.hpp"
 #include "request_handler.hpp"
+#include "request.hpp"
+#include "response.hpp"
 
 namespace http {
 namespace server {
 
 connection::connection(boost::asio::io_service& io_service,
-    connection_manager& manager, request_handler_static& handler_static,
-      request_handler_echo& handler_echo)
+    connection_manager& manager,
+    std::map<std::string, RequestHandler*> handlers,
+    RequestHandler* default_handler)
   : socket_(io_service),
     connection_manager_(manager),
-    request_handler_static_(handler_static),
-    request_handler_echo_(handler_echo)
+    handlers_(handlers),
+    default_handler_(default_handler)
 {
 }
 
@@ -45,35 +48,25 @@ void connection::stop() {
 void connection::handle_read(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
   if (!e) {
-    boost::tribool result;
-    boost::tie(result, boost::tuples::ignore) = request_parser_.parse(request_, buffer_.data(), buffer_.data() + bytes_transferred);
 
-    if (result) {
-      if (request_.uri == request_handler_echo_.GetPath()){      //we want echo files
-        request_handler_echo_.handle_request(request_, reply_);
-        boost::asio::async_write(socket_, reply_.to_buffers(),
+    request_ = Request::Parse(buffer_.data());
+
+    // TODO: determine the correct handler to send the request to
+    // Do error handling on the result of the HandleRequest() call
+    // (this is just a placeholder to use an echo handler)
+    RequestHandler* echo = new RequestHandlerEcho();
+    response_ = new Response();
+    echo->HandleRequest(*request_, response_);
+
+    // Write response to socket
+    // TODO: this is unneccessarily complex but just trying to make things work right now
+    std::vector<boost::asio::const_buffer> buffers;
+    std::string response_string = response_->ToString();
+    buffers.push_back(boost::asio::buffer(response_string));
+    boost::asio::async_write(socket_, buffers,
           boost::bind(&connection::handle_write, shared_from_this(),
             boost::asio::placeholders::error));
-      }
-      else{                                                       //we want static files
-        request_handler_static_.handle_request(request_, reply_);
-        boost::asio::async_write(socket_, reply_.to_buffers(),
-          boost::bind(&connection::handle_write, shared_from_this(),
-            boost::asio::placeholders::error));
-      }
-    }
-    else if (!result) {
-      reply_ = reply::stock_reply(reply::bad_request);
-      boost::asio::async_write(socket_, reply_.to_buffers(),
-        boost::bind(&connection::handle_write, shared_from_this(),
-          boost::asio::placeholders::error));
-    }
-    else {
-      socket_.async_read_some(boost::asio::buffer(buffer_),
-        boost::bind(&connection::handle_read, shared_from_this(),
-          boost::asio::placeholders::error,
-          boost::asio::placeholders::bytes_transferred));
-    }
+
   }
 
   else if (e != boost::asio::error::operation_aborted) {

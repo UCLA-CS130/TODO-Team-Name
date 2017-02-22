@@ -17,27 +17,12 @@
 namespace http {
 namespace server {
 
-struct reply;
-struct request;
-
 /// Handler for echo requests.
-class request_handler_echo : public http::server::request_handler {
+class RequestHandlerEcho : public http::server::RequestHandler {
 public:
-  // Default constructor (to use for testing only)
-  request_handler_echo() {};
+  Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 
-  request_handler_echo(const std::string path_for_echo){
-  	echo_path = path_for_echo;
-  };
-
-  std::string GetPath() { return echo_path; }
-
-  /// Handle a request and produce an echo response.
-  void handle_request(const request& req, reply& rep) override;
-
-private:
-	std::string echo_path;
-
+  Status HandleRequest(const Request& request, Response* response) override;
 };
 
 } // namespace server

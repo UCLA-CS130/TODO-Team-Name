@@ -65,11 +65,11 @@ private:
   /// The next connection to be accepted.
   connection_ptr new_connection_;
 
-  /// The handler for incoming static requests.
-  request_handler_static request_handler_static_;
+  /// Map of URL paths to Request Handlers.
+  std::map<std::string, RequestHandler*> handlers_;
 
-  /// The handler for incoming echo requests.
-  request_handler_echo request_handler_echo_;
+  /// The default request handler if no URL path matches.
+  RequestHandler* default_handler_;
 
   //pointer to server_options
   const server_options* server_options_;
