@@ -9,25 +9,26 @@
 //
 
 #include "request_handler_echo.hpp"
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <boost/lexical_cast.hpp>
-#include "reply.hpp"
+#include "response.hpp"
 #include "request.hpp"
 
 namespace http {
 namespace server {
 
-// Simple 'echo' response
-void request_handler_echo::handle_request(const request& req, reply& rep) {
-  rep.status = reply::ok; // 200 OK response
-  rep.content = req.full_header;
-  rep.headers.resize(2);
-  rep.headers[0].name = "Content-Length";
-  rep.headers[0].value = boost::lexical_cast<std::string>(rep.content.size());
-  rep.headers[1].name = "Content-Type";
-  rep.headers[1].value = "text/plain";
+RequestHandler::Status RequestHandlerEcho::Init(const std::string& uri_prefix, const NginxConfig& config) {
+	uri_prefix_ = uri_prefix;
+	return RequestHandler::OK;
+}
+
+RequestHandler::Status RequestHandlerEcho::HandleRequest(const Request& request, Response* response) {
+	response->SetStatus(Response::OK);
+	response->AddHeader("Content-Length", std::to_string(request.raw_request().size()));
+	response->AddHeader("Content-Type", "text/plain");
+	response->SetBody(request.raw_request());
+
+	return RequestHandler::OK;
 }
 
 } // namespace server

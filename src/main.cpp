@@ -14,7 +14,6 @@
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
 #include "server.hpp"
-#include "nginx-configparser/config_parser.h"
 #include "server_options.hpp"
 #include <sys/stat.h>
 
@@ -51,14 +50,7 @@ void get_server_options(NginxConfig config, http::server::server_options *server
 
       // Static
       else if (statement.at(2) == "StaticHandler") {
-        std::vector<std::shared_ptr<NginxConfigStatement>> child_statements = config_line->child_block_->statements_;
-        if (child_statements.size() > 0) {
-          std::shared_ptr<NginxConfigStatement> child_statement_line = child_statements.at(0);
-          std::vector<std::string> child_statement = child_statement_line->tokens_;
-          if (child_statement.size() == 2 && child_statement.at(0) == "root") {
-            server_options_pointer->static_handlers[statement.at(1)] = child_statement.at(1);
-          }
-        }
+        server_options_pointer->static_handlers[statement.at(1)] = config_line->child_block_;
       }
     }
 
@@ -93,43 +85,22 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
     return false;
   }
 
-  // Loop through map of server options and make sure the roots exist
-  struct stat sb;
-  std::string try_path;
-  std::map<std::string, std::string> static_handlers = server_options_pointer->static_handlers;
-
-
-  for (auto it = static_handlers.begin(); it != static_handlers.end(); ++it) {
-    // Create a boost path out of suggested root
-    try_path = "./" + it->second;
-    if(stat(try_path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)){ // true, directory exists
-      // Directory exists
-    }
-    else{
-      std::cerr << "ERROR: Invalid root directory. The directory " << it->second << " does not exist for url path " << it->first << ".\n";
-      return false;
-    }
-  }
-
   return true;
 }
 
 void print_parsed_config(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
-  std::string port = server_options_pointer->port;
-  std::vector<std::string> echo_handlers = server_options_pointer->echo_handlers;
-  std::map<std::string, std::string> static_handlers = server_options_pointer->static_handlers;
+  std::cout << "Port: " << server_options_pointer->port << "\n";
 
-  std::cout << "Port: " << port << "\n";
-
-  for (unsigned int i = 0; i < echo_handlers.size(); i++) {
-    std::cout << "Echo Handler " << echo_handlers.at(i) << "\n";
+  for (unsigned int i = 0; i < server_options_pointer->echo_handlers.size(); i++) {
+    std::cout << "Echo Handler " << server_options_pointer->echo_handlers.at(i) << "\n";
   }
 
-  for (auto it = static_handlers.begin(); it != static_handlers.end(); ++it) {
-    std::cout << "Static Handler "<< it->first << " accesses root " << it->second << "\n";
+  for (auto it = server_options_pointer->static_handlers.begin(); it != server_options_pointer->static_handlers.end(); ++it) {
+    std::cout << "Static Handler "<< it->first << "\n";
   }
-
+  
+  std::cout << "Default Handler " << server_options_pointer->default_handler << "\n";
   std::cout << "*******************************" << "\n";
 }
 
