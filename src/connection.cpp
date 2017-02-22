@@ -10,7 +10,9 @@
 
 #include "connection.hpp"
 #include <vector>
+#include <deque>
 #include <string>
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <boost/bind.hpp>
@@ -53,20 +55,73 @@ void connection::stop() {
   socket_.close();
 }
 
+std::deque<std::string> connection::splitUri(std::string uri){
+  std::deque<std::string> ret;
+  std::size_t last_slash_pos;
+  std::string token;
+  while ((last_slash_pos = uri.find_last_of("/")) != std::string::npos) {
+    token = uri.substr(last_slash_pos);
+    ret.push_front(token);
+    uri.erase(last_slash_pos, last_slash_pos+token.length());
+  }
+  return ret;
+}
+
+int connection::longestSubstring(std::deque<std::string> req, std::deque<std::string> handler){
+  int ret = 0;
+  int upperBound = std::min(req.size(), handler.size());
+
+  for (int i = 0; i < upperBound; i++){
+    if (req[i] == handler[i])
+      ret++;
+    else
+      return ret;
+  }
+  return ret;
+}
+
+RequestHandler* connection::chooseHandler(){
+  // Create a response
+    response_ = new Response();
+
+    std::deque<std::string> request_uri_tokens = splitUri(request_->uri());
+    // Decide which handler to use
+    RequestHandler* bestHandler = default_handler_; 
+    // loop through handlers 
+    int quality;
+    int max = 0;
+    for( auto it = handlers_.begin(); it != handlers_.end(); ++it) {
+      // Get data from it
+      std::string uri_prefix = it->first;
+      
+      std::deque<std::string> handler_uri_tokens = splitUri(uri_prefix);
+
+      quality = longestSubstring(request_uri_tokens, handler_uri_tokens);
+      if (quality > max){
+        max = quality;
+        bestHandler = it->second;
+        std::cerr << "Best handler is: " << uri_prefix << "\n";
+      }
+    }
+    //invoke the handler
+    return bestHandler;
+}
+
 void connection::handle_read(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
   if (!e) {
-    //convert our buffer to a string
+    // Get the request
     std::string raw_req(buffer_);
     request_ = Request::Parse(raw_req);
 
+    // Pick a handler and handle the request
+    auto statCode = chooseHandler()->HandleRequest(*request_, response_);
 
-    // TODO: determine the correct handler to send the request to
-    // Do error handling on the result of the HandleRequest() call
-    // (this is just a placeholder to use an echo handler)
-    RequestHandler* echo = new EchoHandler();
-    response_ = new Response();
-    echo->HandleRequest(*request_, response_);
+    //TODO: different handlers for different status codes
+    if (statCode){
+      default_handler_->HandleRequest(*request_, response_);
+      std::cerr << "Error: handler returned status code " << statCode << ".\n";
+    }
 
     // Write response to socket
     // TODO: this is unneccessarily complex but just trying to make things work right now

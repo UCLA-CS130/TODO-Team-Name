@@ -32,24 +32,25 @@ server::server(const std::string& address, const server_options* server_options_
     NginxConfig config;
     handler_->Init(uri_prefix, config);
     handlers_[uri_prefix] = handler_;
-
-    //TODO: REMOVE THIS
-    default_handler_ = handler_;
   }
 
-  // // Initialize static handlers
-  // for(auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
-  //   //Get data from it
-  //   std::string uri_prefix = it->first;
-  //   NginxConfig config = it->second;
-  //   //Create handler
-  //   RequestHandler* handler_ = new RequestHandlerStatic();
-  //   handler_->Init(uri_prefix, config);
-  //   handlers_[uri_prefix] = handler_;
-  // }
+  // Initialize static handlers
+  for(auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
+    //Get data from it
+    std::string uri_prefix = it->first;
+    NginxConfig* config = it->second;
+    //Create handler
+    RequestHandler* handler_ = new request_handler_static();
+    handler_->Init(uri_prefix, *config);
+    handlers_[uri_prefix] = handler_;
+  }
 
-  // TODO: Initialize default handler
-  // Right now it is set to the echo handler
+  // TODO: change how this works
+  // Initialize default handler
+  RequestHandler* handler_ = new RequestHandlerNotFound();
+  NginxConfig config;
+  handler_->Init("", config);
+  default_handler_ = handler_;
 
   // Get the port
   std::string port = server_options_->port;

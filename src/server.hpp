@@ -18,6 +18,7 @@
 #include "connection_manager.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include "request_handler_notfound.hpp"
 #include "server_options.hpp"
 
 namespace http {
