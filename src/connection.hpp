@@ -21,6 +21,7 @@
 #include "request.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include "request_handler_notfound.hpp"
 
 namespace http {
 namespace server {
