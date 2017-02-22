@@ -2,11 +2,6 @@
 // request_handler_static.cpp
 // ~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-//
-// Distributed under the Boost Software License, Version 1.0. (See accompanying
-// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-//
 
 #include <iostream>
 #include "request_handler_static.hpp"
@@ -23,20 +18,21 @@ namespace server {
 
 RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
-	std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = config.statements_;
-	if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
-              && static_handler_statements.at(0)->tokens_.at(0) == "root") {
-              root = static_handler_statements.at(0)->tokens_.at(1);
-          return RequestHandler::OK;
-    	}
-    return RequestHandler::BAD_CONFIG;
+	std::vector<std::shared_ptr<NginxConfigStatement>> statements = config.statements_;
+
+  // Get root directory from config.
+	if (statements.size() == 1) {
+    std::vector<std::string> statement_tokens = statements.at(0)->tokens_;
+    if (statement_tokens.size() == 2 && statement_tokens.at(0) == "root") {
+      root_ = statement_tokens.at(1);
+      return RequestHandler::OK;
+    }
+  }
+
+  return RequestHandler::BAD_CONFIG;
 }
 
-StaticHandler::StaticHandler(){
-	uri_prefix_ = "";
-}
-
-// Serve the static file that is requested
+// Serve the static file that is requested.
 RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
 
   // Decode url to path.
@@ -45,13 +41,13 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     return RequestHandler::BAD_REQUEST;
   }
 
-  // gets the desired path
+  // Gets the desired path.
   std::string request_path = request_string.substr(0, request_string.find('/', 1));
 
-  //this string contains the actual path to the file.
+  // This string contains the actual path to the file.
   std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
 
-  //Request path must be absolute and not contain "..".
+  // Request path must be absolute and not contain "..".
   if (request_file.empty() || request_file[0] != '/'
       || request_file.find("..") != std::string::npos) {
     return RequestHandler::BAD_REQUEST;
@@ -70,22 +66,22 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     extension = request_file.substr(last_dot_pos + 1);
   }
 
-  //TODO: dont open full path, only the file that we are asking for
+  // TODO: dont open full path, only the file that we are asking for
   // Open the file to send back.
-  std::string full_path = root + request_file;
+  std::string full_path = root_ + request_file;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
     return RequestHandler::IOERROR;
   }
 
-  // Fill out the reply to be sent to the client.
+  // Fill out the response to be sent to the client.
   response->SetStatus(Response::OK);
   char buf[512];
-  std::string temp = "";
+  std::string file_content = "";
   while (is.read(buf, sizeof(buf)).gcount() > 0) {
-  	temp.append(buf, is.gcount());
+  	file_content.append(buf, is.gcount());
   }
-  response->SetBody(temp);
+  response->SetBody(file_content);
   response->AddHeader("Content-Length", boost::lexical_cast<std::string>(response->ToString().size()));
   response->AddHeader("Content-Type", mime_types::extension_to_type(extension));
   return RequestHandler::OK;

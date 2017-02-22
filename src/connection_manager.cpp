@@ -15,19 +15,19 @@
 namespace http {
 namespace server {
 
-void connection_manager::start(connection_ptr c) {
+void ConnectionManager::start(connection_ptr c) {
   connections_.insert(c);
   c->start();
 }
 
-void connection_manager::stop(connection_ptr c) {
+void ConnectionManager::stop(connection_ptr c) {
   connections_.erase(c);
   c->stop();
 }
 
-void connection_manager::stop_all() {
+void ConnectionManager::stopAll() {
   std::for_each(connections_.begin(), connections_.end(),
-      boost::bind(&connection::stop, _1));
+      boost::bind(&Connection::stop, _1));
   connections_.clear();
 }
 

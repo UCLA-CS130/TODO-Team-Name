@@ -24,7 +24,7 @@ namespace http {
 }
 
 // Given a parsed config file, return a struct containing the config info
-void get_server_options(NginxConfig config, http::server::server_options *server_options_pointer) {
+void getServerOptions(NginxConfig config, http::server::server_options *server_options_pointer) {
 
   server_options_pointer->port = "";
   std::string m_path;
@@ -34,7 +34,6 @@ void get_server_options(NginxConfig config, http::server::server_options *server
     std::shared_ptr<NginxConfigStatement> config_line = config.statements_.at(i);
     std::vector<std::string> statement = config_line->tokens_;
 
-
     // Port
     if (statement.size() == 2 && statement.at(0) == "port") {
       server_options_pointer->port = statement.at(1);
@@ -42,12 +41,10 @@ void get_server_options(NginxConfig config, http::server::server_options *server
 
     // Handlers
     if (statement.size() == 3 && statement.at(0) == "path") {
-
       // Echo
       if (statement.at(2) == "EchoHandler") {
         server_options_pointer->echo_handlers.push_back(statement.at(1));
       }
-
       // Static
       else if (statement.at(2) == "StaticHandler") {
         server_options_pointer->static_handlers[statement.at(1)] = config_line->child_block_;
@@ -62,7 +59,7 @@ void get_server_options(NginxConfig config, http::server::server_options *server
 }
 
 // Parse the config file, handling error
-bool parse_config(char * config_file, http::server::server_options *server_options_pointer) {
+bool parseConfig(char * config_file, http::server::server_options *server_options_pointer) {
   NginxConfigParser config_parser;
   NginxConfig config;
 
@@ -70,7 +67,7 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
     return false;
   }
 
-  get_server_options(config, server_options_pointer);
+  getServerOptions(config, server_options_pointer);
   std::string port = server_options_pointer->port;
 
   if (port == "") {
@@ -88,7 +85,7 @@ bool parse_config(char * config_file, http::server::server_options *server_optio
   return true;
 }
 
-void print_parsed_config(http::server::server_options *server_options_pointer) {
+void printParsedConfig(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
   std::cout << "Port: " << server_options_pointer->port << "\n";
 
@@ -115,12 +112,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize the server.
-    if (parse_config(argv[1], &server_options_)) {
+    if (parseConfig(argv[1], &server_options_)) {
 
       // for debugging
-      print_parsed_config(&server_options_);
+      printParsedConfig(&server_options_);
 
-      http::server::server s("0.0.0.0", &server_options_);
+      http::server::Server s("0.0.0.0", &server_options_);
       std::cerr << "Listening at port " << server_options_.port << "\n";
       // Run the server until stopped.
       s.run();

@@ -24,8 +24,8 @@
 namespace http {
 namespace server {
 
-connection::connection(boost::asio::io_service& io_service,
-    connection_manager& manager,
+Connection::Connection(boost::asio::io_service& io_service,
+    ConnectionManager& manager,
     std::map<std::string, RequestHandler*> handlers,
     RequestHandler* default_handler)
   : socket_(io_service),
@@ -36,26 +36,26 @@ connection::connection(boost::asio::io_service& io_service,
   clearBuffer();
 }
 
-void connection::clearBuffer() {
+void Connection::clearBuffer() {
   memset( buffer_, '\0', sizeof(char)*BUF_SIZE );
 }
 
-boost::asio::ip::tcp::socket& connection::socket() {
+boost::asio::ip::tcp::socket& Connection::socket() {
   return socket_;
 }
 
-void connection::start() {
+void Connection::start() {
   socket_.async_read_some(boost::asio::buffer(buffer_, BUF_SIZE),
-      boost::bind(&connection::handle_read, shared_from_this(),
+      boost::bind(&Connection::handleRead, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
 }
 
-void connection::stop() {
+void Connection::stop() {
   socket_.close();
 }
 
-std::deque<std::string> connection::splitUri(std::string uri){
+std::deque<std::string> Connection::splitUri(std::string uri) {
   std::deque<std::string> ret;
   std::size_t last_slash_pos;
   std::string token;
@@ -67,7 +67,7 @@ std::deque<std::string> connection::splitUri(std::string uri){
   return ret;
 }
 
-int connection::longestSubstring(std::deque<std::string> req, std::deque<std::string> handler){
+int Connection::longestSubstring(std::deque<std::string> req, std::deque<std::string> handler) {
   int ret = 0;
   int upperBound = std::min(req.size(), handler.size());
 
@@ -80,69 +80,70 @@ int connection::longestSubstring(std::deque<std::string> req, std::deque<std::st
   return ret;
 }
 
-RequestHandler* connection::chooseHandler(){
+RequestHandler* Connection::chooseHandler() {
   // Create a response
-    response_ = new Response();
+  response_ = new Response();
 
-    std::deque<std::string> request_uri_tokens = splitUri(request_->uri());
-    // Decide which handler to use
-    RequestHandler* bestHandler = default_handler_; 
-    // loop through handlers 
-    int quality;
-    int max = 0;
-    for( auto it = handlers_.begin(); it != handlers_.end(); ++it) {
-      // Get data from it
-      std::string uri_prefix = it->first;
+  std::deque<std::string> request_uri_tokens = splitUri(request_->uri());
+
+  // Decide which handler to use.
+  RequestHandler* best_handler = default_handler_; 
+
+  // Loop through handlers.
+  int quality;
+  int max = 0;
+  for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
+    // Get data from it
+    std::string uri_prefix = it->first;
       
-      std::deque<std::string> handler_uri_tokens = splitUri(uri_prefix);
+    std::deque<std::string> handler_uri_tokens = splitUri(uri_prefix);
 
-      quality = longestSubstring(request_uri_tokens, handler_uri_tokens);
-      if (quality > max){
-        max = quality;
-        bestHandler = it->second;
-        std::cerr << "Best handler is: " << uri_prefix << "\n";
-      }
+    quality = longestSubstring(request_uri_tokens, handler_uri_tokens);
+    if (quality > max) {
+      max = quality;
+      best_handler = it->second;
+      std::cerr << "Best handler is: " << uri_prefix << "\n";
     }
-    //invoke the handler
-    return bestHandler;
+  }
+  // Invoke the handler.
+  return best_handler;
 }
 
-void connection::handle_read(const boost::system::error_code& e,
+void Connection::handleRead(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
+
   if (!e) {
-    // Get the request
+    // Get the request.
     std::string raw_req(buffer_);
     request_ = Request::Parse(raw_req);
 
-    // Pick a handler and handle the request
-    auto statCode = chooseHandler()->HandleRequest(*request_, response_);
+    // Pick a handler and handle the request.
+    auto stat_code = chooseHandler()->HandleRequest(*request_, response_);
 
-    //TODO: different handlers for different status codes
-    if (statCode){
+    //TODO: different handlers for different status codes.
+    if (stat_code){
       default_handler_->HandleRequest(*request_, response_);
-      std::cerr << "Error: handler returned status code " << statCode << ".\n";
+      std::cerr << "Error: handler returned status code " << stat_code << ".\n";
     }
 
-    // Write response to socket
-    // TODO: this is unneccessarily complex but just trying to make things work right now
+    // Write response to socket.
     std::vector<boost::asio::const_buffer> buffers;
     std::string response_string = response_->ToString();
     buffers.push_back(boost::asio::buffer(response_string));
     boost::asio::async_write(socket_, buffers,
-          boost::bind(&connection::handle_write, shared_from_this(),
+          boost::bind(&Connection::handleWrite, shared_from_this(),
             boost::asio::placeholders::error));
-
   }
 
   else if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }
 
-  // Make sure buffer is clear before another read
+  // Make sure buffer is clear before another read.
   clearBuffer();
 }
 
-void connection::handle_write(const boost::system::error_code& e) {
+void Connection::handleWrite(const boost::system::error_code& e) {
   if (!e) {
     // Initiate graceful connection closure.
     boost::system::error_code ignored_ec;
