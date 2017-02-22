@@ -12,12 +12,12 @@
 namespace http {
 namespace server {
 
-RequestHandler::Status RequestHandlerNotFound::Init(const std::string& uri_prefix, const NginxConfig& config) {
+RequestHandler::Status NotFoundHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
 	return RequestHandler::OK;
 }
 
-RequestHandler::Status RequestHandlerNotFound::HandleRequest(const Request& request, Response* response) {
+RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Response* response) {
 	 const std::string NOT_FOUND_HTML = "<html><head><title>Not Found</title></head><body><h1>404 Not Found</h1></body></html>";
 
 	response->SetStatus(Response::NOT_FOUND);
