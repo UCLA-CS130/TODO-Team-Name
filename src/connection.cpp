@@ -10,6 +10,9 @@
 
 #include "connection.hpp"
 #include <vector>
+#include <string>
+#include <iostream>
+#include <memory>
 #include <boost/bind.hpp>
 #include "connection_manager.hpp"
 #include "request_handler.hpp"
@@ -28,6 +31,11 @@ connection::connection(boost::asio::io_service& io_service,
     handlers_(handlers),
     default_handler_(default_handler)
 {
+  clearBuffer();
+}
+
+void connection::clearBuffer() {
+  memset( buffer_, '\0', sizeof(char)*BUF_SIZE );
 }
 
 boost::asio::ip::tcp::socket& connection::socket() {
@@ -35,7 +43,7 @@ boost::asio::ip::tcp::socket& connection::socket() {
 }
 
 void connection::start() {
-  socket_.async_read_some(boost::asio::buffer(buffer_),
+  socket_.async_read_some(boost::asio::buffer(buffer_, BUF_SIZE),
       boost::bind(&connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
@@ -48,8 +56,10 @@ void connection::stop() {
 void connection::handle_read(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
   if (!e) {
+    //convert our buffer to a string
+    std::string raw_req(buffer_);
+    request_ = Request::Parse(raw_req);
 
-    request_ = Request::Parse(buffer_.data());
 
     // TODO: determine the correct handler to send the request to
     // Do error handling on the result of the HandleRequest() call
@@ -72,6 +82,9 @@ void connection::handle_read(const boost::system::error_code& e,
   else if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }
+
+  // Make sure buffer is clear before another read
+  clearBuffer();
 }
 
 void connection::handle_write(const boost::system::error_code& e) {

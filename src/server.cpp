@@ -24,7 +24,7 @@ server::server(const std::string& address, const server_options* server_options_
     new_connection_(),
     server_options_(server_options_) {
 
-  // Initialize request handlers
+  // Initialize echo request handler
   for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
     std::string uri_prefix = server_options_->echo_handlers.at(i);
     // TODO: error handling based on the value of Status
@@ -32,9 +32,24 @@ server::server(const std::string& address, const server_options* server_options_
     NginxConfig config;
     handler_->Init(uri_prefix, config);
     handlers_[uri_prefix] = handler_;
+
+    //TODO: REMOVE THIS
+    default_handler_ = handler_;
   }
 
-  // TODO: Initialize static and default handlers
+  // // Initialize static handlers
+  // for(auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
+  //   //Get data from it
+  //   std::string uri_prefix = it->first;
+  //   NginxConfig config = it->second;
+  //   //Create handler
+  //   RequestHandler* handler_ = new RequestHandlerStatic();
+  //   handler_->Init(uri_prefix, config);
+  //   handlers_[uri_prefix] = handler_;
+  // }
+
+  // TODO: Initialize default handler
+  // Right now it is set to the echo handler
 
   // Get the port
   std::string port = server_options_->port;
