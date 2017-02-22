@@ -1,49 +1,43 @@
-// //
-// // request_handler_static.hpp
-// // ~~~~~~~~~~~~~~~~~~~
-// //
-// // Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
-// //
-// // Distributed under the Boost Software License, Version 1.0. (See accompanying
-// // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-// //
+//
+// request_handler_static.hpp
+// ~~~~~~~~~~~~~~~~~~~
+//
+// Copyright (c) 2003-2012 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+//
+// Distributed under the Boost Software License, Version 1.0. (See accompanying
+// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
 
-// #ifndef HTTP_REQUEST_HANDLER_STATIC_HPP
-// #define HTTP_REQUEST_HANDLER_STATIC_HPP
+#ifndef HTTP_REQUEST_HANDLER_STATIC_HPP
+#define HTTP_REQUEST_HANDLER_STATIC_HPP
 
-// #include "request_handler.hpp"
-// #include "server_options.hpp"
-// #include <map>
+#include "request_handler.hpp"
+#include <map>
 
-// namespace http {
-// namespace server {
+namespace http {
+namespace server {
 
-// struct reply;
-// struct request;
-// struct server_options;
+/// Handler for atatic file requests.
+class request_handler_static : public http::server::RequestHandler {
+public:
 
-// /// Handler for atatic file requests.
-// class request_handler_static : public http::server::request_handler {
-// public:
+  request_handler_static();
 
-//   // Default constructor (to use for testing only)
-//   request_handler_static() {
-//   	server_options_ = nullptr;
-//   };
+  //initializes the handler with path and root
+  Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 
-//   request_handler_static(const server_options* server_options_);
-//   /// Handle a request and produce an echo response.
-//   void handle_request(const request& req, reply& rep) override;
+  /// Handle a request and produce an echo response.
+  Status HandleRequest(const Request& request, Response* response) override;
 
-// private:
-//   /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
-//   static bool url_decode(const std::string& in, std::string& out);
+private:
+  /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
+  static bool url_decode(const std::string& in, std::string& out);
 
-//   // Pointer to server_options
-//   const server_options* server_options_;
-// };
+  std::string uri_prefix_;
+  std::string root;
+};
 
-// } // namespace server
-// } // namespace http
+} // namespace server
+} // namespace http
 
-// #endif // HTTP_REQUEST_HANDLER_STATIC_HPP
+#endif // HTTP_REQUEST_HANDLER_STATIC_HPP
