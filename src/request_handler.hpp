@@ -24,7 +24,10 @@ namespace server {
 class RequestHandler {
  public:
   enum Status {
-    OK = 0
+    OK = 0,
+    BAD_REQUEST = 1,
+    IOERROR = 2,
+    BAD_CONFIG = 3
     // Define your status codes here.
   };
   
