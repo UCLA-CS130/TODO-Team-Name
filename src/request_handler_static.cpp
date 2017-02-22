@@ -21,9 +21,6 @@
 namespace http {
 namespace server {
 
-// request_handler_static::request_handler_static(const server_options* server_options_) 
-//   : server_options_(server_options_){}
-
 RequestHandler::Status request_handler_static::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
 	std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = config.statements_;
@@ -42,8 +39,6 @@ request_handler_static::request_handler_static(){
 
 // Serve the static file that is requested
 RequestHandler::Status request_handler_static::HandleRequest(const Request& request, Response* response) {
-  // root on localhost containing desired files
-  std::string static_file_root_;
 
   // Decode url to path.
   std::string request_string;
@@ -53,10 +48,9 @@ RequestHandler::Status request_handler_static::HandleRequest(const Request& requ
 
   // gets the desired path
   std::string request_path = request_string.substr(0, request_string.find('/', 1));
-  // first part of url is the path, as specified in config. Check map TODO:
   if ( request_path != uri_prefix_ ) {
     // not correct path
-    return RequestHandler::BAD_REQUEST; //TODO: legit error handling
+    return RequestHandler::BAD_REQUEST;
   }
   //this string contains the actual path to the file.
   std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
