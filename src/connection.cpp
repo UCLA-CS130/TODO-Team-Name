@@ -54,7 +54,7 @@ void connection::handle_read(const boost::system::error_code& e,
     // TODO: determine the correct handler to send the request to
     // Do error handling on the result of the HandleRequest() call
     // (this is just a placeholder to use an echo handler)
-    RequestHandler* echo = new RequestHandlerEcho();
+    RequestHandler* echo = new EchoHandler();
     response_ = new Response();
     echo->HandleRequest(*request_, response_);
 

@@ -28,7 +28,7 @@ server::server(const std::string& address, const server_options* server_options_
   for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
     std::string uri_prefix = server_options_->echo_handlers.at(i);
     // TODO: error handling based on the value of Status
-    RequestHandler* handler_ = new RequestHandlerEcho();
+    RequestHandler* handler_ = new EchoHandler();
     NginxConfig config;
     handler_->Init(uri_prefix, config);
     handlers_[uri_prefix] = handler_;

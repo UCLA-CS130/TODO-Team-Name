@@ -13,7 +13,7 @@ namespace http {
 namespace server {
 
 /// Handler for 404 not found requests.
-class RequestHandlerNotFound : public http::server::RequestHandler {
+class NotFoundHandler : public http::server::RequestHandler {
 public:
   Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 

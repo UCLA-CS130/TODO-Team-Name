@@ -21,7 +21,7 @@
 namespace http {
 namespace server {
 
-RequestHandler::Status request_handler_static::Init(const std::string& uri_prefix, const NginxConfig& config) {
+RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
 	std::vector<std::shared_ptr<NginxConfigStatement>> static_handler_statements = config.statements_;
 	if (static_handler_statements.size() == 1 && static_handler_statements.at(0)->tokens_.size() == 2
@@ -32,13 +32,13 @@ RequestHandler::Status request_handler_static::Init(const std::string& uri_prefi
     return RequestHandler::BAD_CONFIG;
 }
 
-request_handler_static::request_handler_static(){
+StaticHandler::StaticHandler(){
 	uri_prefix_
 	 = "";
 }
 
 // Serve the static file that is requested
-RequestHandler::Status request_handler_static::HandleRequest(const Request& request, Response* response) {
+RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Response* response) {
 
   // Decode url to path.
   std::string request_string;
@@ -85,15 +85,16 @@ RequestHandler::Status request_handler_static::HandleRequest(const Request& requ
   response->SetStatus(Response::OK);
   char buf[512];
   std::string temp = "";
-  while (is.read(buf, sizeof(buf)).gcount() > 0)
-    temp.append(buf, is.gcount());
-	response->SetBody(temp);
+  while (is.read(buf, sizeof(buf)).gcount() > 0) {
+  	temp.append(buf, is.gcount());
+  }
+  response->SetBody(temp);
   response->AddHeader("Content-Length", boost::lexical_cast<std::string>(response->ToString().size()));
   response->AddHeader("Content-Type", mime_types::extension_to_type(extension));
   return RequestHandler::OK;
 }
 
-bool request_handler_static::url_decode(const std::string& in, std::string& out) {
+bool StaticHandler::url_decode(const std::string& in, std::string& out) {
   out.clear();
   out.reserve(in.size());
   for (std::size_t i = 0; i < in.size(); ++i) {

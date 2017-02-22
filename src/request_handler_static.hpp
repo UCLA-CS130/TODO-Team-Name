@@ -18,19 +18,19 @@ namespace http {
 namespace server {
 
 /// Handler for atatic file requests.
-class request_handler_static : public http::server::RequestHandler {
+class StaticHandler : public http::server::RequestHandler {
 public:
 
-  request_handler_static();
+  StaticHandler();
 
-  //initializes the handler with path and root
+  // Initializes the handler with path and root.
   Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 
-  /// Handle a request and produce an echo response.
+  // Handle a request and produce a response with a static file.
   Status HandleRequest(const Request& request, Response* response) override;
 
 private:
-  /// Perform URL-decoding on a string. Returns false if the encoding is invalid.
+  // Perform URL-decoding on a string. Returns false if the encoding is invalid.
   static bool url_decode(const std::string& in, std::string& out);
 
   std::string uri_prefix_;

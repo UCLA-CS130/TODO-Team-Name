@@ -17,12 +17,12 @@
 namespace http {
 namespace server {
 
-RequestHandler::Status RequestHandlerEcho::Init(const std::string& uri_prefix, const NginxConfig& config) {
+RequestHandler::Status EchoHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
 	return RequestHandler::OK;
 }
 
-RequestHandler::Status RequestHandlerEcho::HandleRequest(const Request& request, Response* response) {
+RequestHandler::Status EchoHandler::HandleRequest(const Request& request, Response* response) {
 	response->SetStatus(Response::OK);
 	response->AddHeader("Content-Length", std::to_string(request.raw_request().size()));
 	response->AddHeader("Content-Type", "text/plain");

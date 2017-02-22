@@ -18,7 +18,7 @@ namespace http {
 namespace server {
 
 /// Handler for echo requests.
-class RequestHandlerEcho : public http::server::RequestHandler {
+class EchoHandler : public http::server::RequestHandler {
 public:
   Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 
