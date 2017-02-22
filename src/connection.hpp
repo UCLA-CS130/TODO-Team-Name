@@ -17,6 +17,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <map>
+#include <vector>
+#include <deque>
+#include <string>
 #include "response.hpp"
 #include "request.hpp"
 #include "request_handler_echo.hpp"
@@ -59,6 +62,15 @@ private:
 
   /// Fill buffer with null bytes
   void clearBuffer();
+
+  //explodes string into vector
+  std::deque<std::string> splitUri(std::string uri);
+
+  //decides which handler to use
+  RequestHandler* chooseHandler();
+
+  //determines longest matching substring
+  int longestSubstring(std::deque<std::string> req, std::deque<std::string> handler);
 
   /// Socket for the connection.
   boost::asio::ip::tcp::socket socket_;

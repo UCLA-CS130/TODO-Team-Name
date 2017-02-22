@@ -33,8 +33,7 @@ RequestHandler::Status request_handler_static::Init(const std::string& uri_prefi
 }
 
 request_handler_static::request_handler_static(){
-	uri_prefix_
-	 = "";
+	uri_prefix_ = "";
 }
 
 // Serve the static file that is requested
@@ -48,10 +47,7 @@ RequestHandler::Status request_handler_static::HandleRequest(const Request& requ
 
   // gets the desired path
   std::string request_path = request_string.substr(0, request_string.find('/', 1));
-  if ( request_path != uri_prefix_ ) {
-    // not correct path
-    return RequestHandler::BAD_REQUEST;
-  }
+
   //this string contains the actual path to the file.
   std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
 
@@ -74,6 +70,7 @@ RequestHandler::Status request_handler_static::HandleRequest(const Request& requ
     extension = request_file.substr(last_dot_pos + 1);
   }
 
+  //TODO: dont open full path, only the file that we are asking for
   // Open the file to send back.
   std::string full_path = root + request_file;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
