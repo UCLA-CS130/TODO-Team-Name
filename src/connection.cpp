@@ -20,6 +20,7 @@
 #include "request_handler.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include "request_handler_status.hpp"
 
 namespace http {
 namespace server {
@@ -27,11 +28,13 @@ namespace server {
 Connection::Connection(boost::asio::io_service& io_service,
     ConnectionManager& manager,
     std::map<std::string, RequestHandler*> handlers,
-    RequestHandler* default_handler)
+    RequestHandler* default_handler,
+    RequestHandler* status_handler)
   : socket_(io_service),
     connection_manager_(manager),
     handlers_(handlers),
-    default_handler_(default_handler)
+    default_handler_(default_handler),
+    status_handler_(status_handler)
 {
   clearBuffer();
 }
@@ -119,9 +122,11 @@ void Connection::handleRead(const boost::system::error_code& e,
     // Pick a handler and handle the request.
     auto stat_code = chooseHandler()->HandleRequest(*request_, response_);
 
-    //TODO: status handler.
+    // Status handler.
+    dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), stat_code);
+
+    // TODO: Do things depending on status code
     if (stat_code){
-      default_handler_->HandleRequest(*request_, response_);
       std::cerr << "Error: handler returned status code " << stat_code << ".\n";
     }
 

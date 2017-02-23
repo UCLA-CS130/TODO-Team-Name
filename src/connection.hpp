@@ -24,6 +24,7 @@
 #include "request.hpp"
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
+#include "request_handler_status.hpp"
 #include "request_handler_notfound.hpp"
 
 namespace http {
@@ -41,7 +42,8 @@ public:
   explicit Connection(boost::asio::io_service& io_service,
     ConnectionManager& manager,
     std::map<std::string, RequestHandler*> handlers,
-    RequestHandler* default_handler);
+    RequestHandler* default_handler,
+    RequestHandler* status_handler);
 
   /// Get the socket associated with the connection.
   boost::asio::ip::tcp::socket& socket();
@@ -83,6 +85,9 @@ private:
 
   /// The default request handler if no URL path matches.
   RequestHandler* default_handler_;
+
+  /// The default request handler if no URL path matches.
+  RequestHandler* status_handler_;
 
   /// Buffer for incoming data.
   enum { BUF_SIZE = 8192 };
