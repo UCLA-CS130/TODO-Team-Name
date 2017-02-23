@@ -36,7 +36,7 @@ Server::Server(const std::string& address, const server_options* server_options)
   for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
     std::string uri_prefix = server_options_->echo_handlers.at(i);
     // TODO: error handling based on the value of Status
-    handler_ = new EchoHandler();
+    handler_ = RequestHandler::CreateByName("EchoHandler");
     handler_->Init(uri_prefix, config);
     handlers_[uri_prefix] = handler_;
   }
@@ -46,21 +46,21 @@ Server::Server(const std::string& address, const server_options* server_options)
     std::string uri_prefix = it->first;
     NginxConfig* config = it->second;
     // Create handler.
-    handler_ = new StaticHandler();
+    handler_ = RequestHandler::CreateByName("StaticHandler");
     handler_->Init(uri_prefix, *config);
     handlers_[uri_prefix] = handler_;
   }
 
   // Initialize status handler.
   std::string uri_prefix = server_options_->status_handler;
-  handler_ = new StatusHandler();
+  handler_ = RequestHandler::CreateByName("StatusHandler");
   handler_->Init(uri_prefix, config);
   dynamic_cast<StatusHandler*>(handler_)->SetHandlers(server_options_->all_handlers);
   handlers_[uri_prefix] = handler_;
   status_handler_ = handler_;
 
   // Initialize default handler.
-  handler_ = new NotFoundHandler();
+  handler_ = RequestHandler::CreateByName("NotFoundHandler");
   handler_->Init("", config);
   default_handler_ = handler_;
 

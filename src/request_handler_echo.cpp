@@ -8,6 +8,7 @@
 #include <boost/lexical_cast.hpp>
 #include "response.hpp"
 #include "request.hpp"
+#include "request_handler.hpp"
 
 namespace http {
 namespace server {
@@ -25,6 +26,8 @@ RequestHandler::Status EchoHandler::HandleRequest(const Request& request, Respon
 
 	return RequestHandler::OK;
 }
+
+REGISTER_REQUEST_HANDLER(EchoHandler);
 
 } // namespace server
 } // namespace http

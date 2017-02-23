@@ -16,6 +16,7 @@
 #include "server.hpp"
 #include "server_options.hpp"
 #include <sys/stat.h>
+#include "request_handler.hpp"
 
 namespace http {
   namespace server {

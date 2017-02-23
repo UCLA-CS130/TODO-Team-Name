@@ -28,5 +28,7 @@ RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Re
 	return RequestHandler::NOT_FOUND;
 }
 
+REGISTER_REQUEST_HANDLER(NotFoundHandler);
+
 } // namespace server
 } // namespace http
