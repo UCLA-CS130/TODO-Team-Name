@@ -102,7 +102,6 @@ RequestHandler* Connection::chooseHandler() {
     if (quality > max) {
       max = quality;
       best_handler = it->second;
-      std::cerr << "Best handler is: " << uri_prefix << "\n";
     }
   }
   // Invoke the handler.
@@ -120,7 +119,7 @@ void Connection::handleRead(const boost::system::error_code& e,
     // Pick a handler and handle the request.
     auto stat_code = chooseHandler()->HandleRequest(*request_, response_);
 
-    //TODO: different handlers for different status codes.
+    //TODO: status handler.
     if (stat_code){
       default_handler_->HandleRequest(*request_, response_);
       std::cerr << "Error: handler returned status code " << stat_code << ".\n";
