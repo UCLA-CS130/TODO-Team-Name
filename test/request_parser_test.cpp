@@ -18,12 +18,11 @@ protected:
 		return false; // Treat indeterminate and false results as bad for testing purposes
 	}
 	http::server::request_parser request_parser_;
-	http::server::request request_;
+	http::server::Request request_;
 };
 
 TEST_F(RequestParserTest, GoodRequest) {
-	std::string good_request = "GET / HTTP/1.1\r\nContent-Type: text/plain\r\n\r\n";
-	EXPECT_EQ(ParseRequest(good_request), true);
+	EXPECT_EQ(ParseRequest("GET / HTTP/1.1\r\nContent-Type: text/plain\r\n\r\n"), true);
 }
 
 TEST_F(RequestParserTest, AllowContentAfterHeaders) {

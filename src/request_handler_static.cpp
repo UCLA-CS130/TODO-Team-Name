@@ -38,6 +38,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   // Decode url to path.
   std::string request_string;
   if (!url_decode(request.uri(), request_string)) {
+    response->SetStatus(Response::BAD_REQUEST);
     return RequestHandler::BAD_REQUEST;
   }
 
@@ -50,6 +51,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   // Request path must be absolute and not contain "..".
   if (request_file.empty() || request_file[0] != '/'
       || request_file.find("..") != std::string::npos) {
+    response->SetStatus(Response::BAD_REQUEST);
     return RequestHandler::BAD_REQUEST;
   }
 
@@ -71,6 +73,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   std::string full_path = root_ + request_file;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
+    response->SetStatus(Response::NOT_FOUND);
     return RequestHandler::IOERROR;
   }
 

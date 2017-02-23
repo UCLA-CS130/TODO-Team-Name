@@ -7,9 +7,9 @@
 #define HTTP_REQUEST_HANDLER_HPP
 
 #include <string>
-#include "nginx-configparser/config_parser.h"
 #include "request.hpp"
 #include "response.hpp"
+#include "../nginx-configparser/config_parser.h"
 
 namespace http {
 namespace server {
