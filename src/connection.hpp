@@ -29,17 +29,17 @@
 namespace http {
 namespace server {
 
-class connection_manager;
+class ConnectionManager;
 
 /// Represents a single connection from a client.
-class connection
-  : public boost::enable_shared_from_this<connection>,
+class Connection
+  : public boost::enable_shared_from_this<Connection>,
     private boost::noncopyable
 {
 public:
   /// Construct a connection with the given io_service.
-  explicit connection(boost::asio::io_service& io_service,
-    connection_manager& manager,
+  explicit Connection(boost::asio::io_service& io_service,
+    ConnectionManager& manager,
     std::map<std::string, RequestHandler*> handlers,
     RequestHandler* default_handler);
 
@@ -54,11 +54,11 @@ public:
 
 private:
   /// Handle completion of a read operation.
-  void handle_read(const boost::system::error_code& e,
+  void handleRead(const boost::system::error_code& e,
       std::size_t bytes_transferred);
 
   /// Handle completion of a write operation.
-  void handle_write(const boost::system::error_code& e);
+  void handleWrite(const boost::system::error_code& e);
 
   /// Fill buffer with null bytes
   void clearBuffer();
@@ -76,7 +76,7 @@ private:
   boost::asio::ip::tcp::socket socket_;
 
   /// The manager for this connection.
-  connection_manager& connection_manager_;
+  ConnectionManager& connection_manager_;
 
   /// Map of URL paths to Request Handlers.
   std::map<std::string, RequestHandler*> handlers_;
@@ -95,7 +95,7 @@ private:
   Response* response_;
 };
 
-typedef boost::shared_ptr<connection> connection_ptr;
+typedef boost::shared_ptr<Connection> connection_ptr;
 
 } // namespace server
 } // namespace http

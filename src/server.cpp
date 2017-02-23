@@ -16,7 +16,7 @@
 namespace http {
 namespace server {
 
-server::server(const std::string& address, const server_options* server_options_)
+Server::Server(const std::string& address, const server_options* server_options_)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
@@ -24,7 +24,7 @@ server::server(const std::string& address, const server_options* server_options_
     new_connection_(),
     server_options_(server_options_) {
 
-  // Initialize echo request handler
+  // Initialize echo request handler.
   for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
     std::string uri_prefix = server_options_->echo_handlers.at(i);
     // TODO: error handling based on the value of Status
@@ -34,26 +34,26 @@ server::server(const std::string& address, const server_options* server_options_
     handlers_[uri_prefix] = handler_;
   }
 
-  // Initialize static handlers
-  for(auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
-    //Get data from it
+  // Initialize static handlers.
+  for (auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
     std::string uri_prefix = it->first;
     NginxConfig* config = it->second;
-    //Create handler
+    // Create handler.
     RequestHandler* handler_ = new StaticHandler();
     handler_->Init(uri_prefix, *config);
     handlers_[uri_prefix] = handler_;
   }
 
   // TODO: change how this works
-  // Initialize default handler
+  // Initialize default handler.
   RequestHandler* handler_ = new NotFoundHandler();
   NginxConfig config;
   handler_->Init("", config);
   default_handler_ = handler_;
 
-  // Get the port
+  // Get the port.
   std::string port = server_options_->port;
+
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
   // provided all registration for the specified signal is made through Asio.
@@ -62,7 +62,7 @@ server::server(const std::string& address, const server_options* server_options_
 #if defined(SIGQUIT)
   signals_.add(SIGQUIT);
 #endif // defined(SIGQUIT)
-  signals_.async_wait(boost::bind(&server::handle_stop, this));
+  signals_.async_wait(boost::bind(&Server::handleStop, this));
 
   // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
   boost::asio::ip::tcp::resolver resolver(io_service_);
@@ -73,10 +73,10 @@ server::server(const std::string& address, const server_options* server_options_
   acceptor_.bind(endpoint);
   acceptor_.listen();
 
-  start_accept();
+  startAccept();
 }
 
-void server::run() {
+void Server::run() {
   // The io_service::run() call will block until all asynchronous operations
   // have finished. While the server is running, there is always at least one
   // asynchronous operation outstanding: the asynchronous accept call waiting
@@ -84,15 +84,15 @@ void server::run() {
   io_service_.run();
 }
 
-void server::start_accept() {
-  new_connection_.reset(new connection(io_service_,
+void Server::startAccept() {
+  new_connection_.reset(new Connection(io_service_,
         connection_manager_, handlers_, default_handler_));
   acceptor_.async_accept(new_connection_->socket(),
-      boost::bind(&server::handle_accept, this,
+      boost::bind(&Server::handleAccept, this,
         boost::asio::placeholders::error));
 }
 
-void server::handle_accept(const boost::system::error_code& e) {
+void Server::handleAccept(const boost::system::error_code& e) {
   // Check whether the server was stopped by a signal before this completion
   // handler had a chance to run.
   if (!acceptor_.is_open()) {
@@ -103,15 +103,15 @@ void server::handle_accept(const boost::system::error_code& e) {
     connection_manager_.start(new_connection_);
   }
 
-  start_accept();
+  startAccept();
 }
 
-void server::handle_stop() {
+void Server::handleStop() {
   // The server is stopped by cancelling all outstanding asynchronous
   // operations. Once all operations have finished the io_service::run() call
   // will exit.
   acceptor_.close();
-  connection_manager_.stop_all();
+  connection_manager_.stopAll();
 }
 
 } // namespace server

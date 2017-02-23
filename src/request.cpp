@@ -12,13 +12,8 @@ namespace http {
 namespace server {
 
 std::unique_ptr<Request> Request::Parse(const std::string& raw_request) {
-  //std::unique_ptr<Request> parsed_request = std::unique_ptr<Request>(new Request());
 
-  // TODO: implement
-  // just filling in the bare minimum needed for echo handler
-  //parsed_request->raw_request_ = raw_request;
-
-  /// The parser for the incoming request.
+  // Use auxiliary class request_parser to perform parsing.
   request_parser request_parser_;
   Request *parsed_request = new Request();
   boost::tribool result;
@@ -26,7 +21,7 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request) {
 
   //TODO: use result in some useful way
 
-  //Get useful information
+  // Get useful information from parser
   parsed_request->raw_request_ = raw_request;
   parsed_request->method_ = request_parser_.getMethod();
   parsed_request->uri_ = request_parser_.getUri();
@@ -36,7 +31,7 @@ std::unique_ptr<Request> Request::Parse(const std::string& raw_request) {
   // Unique pointers are fun
   std::unique_ptr<Request> pointer_to_req(parsed_request);
 
-  //Return a pointer, not object
+  // Return a pointer, not object
   return pointer_to_req;
 }
 
@@ -63,7 +58,6 @@ Request::Headers Request::headers() const {
 std::string Request::body() const {
   return body_;
 }
-
 
 } // namespace server
 } // namespace http

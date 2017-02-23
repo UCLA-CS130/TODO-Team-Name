@@ -1,5 +1,5 @@
 language: cpp
-script: ./run_tests.sh
+script: ./test/run_tests.sh
 addons:
  apt:
    packages:

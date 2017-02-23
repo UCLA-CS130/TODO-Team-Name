@@ -27,13 +27,13 @@ namespace server {
 struct server_options;
 
 /// The top-level class of the HTTP server.
-class server
+class Server
   : private boost::noncopyable
 {
 public:
   /// Construct the server to listen on the specified TCP address and port
   /// Serve static files from the directory specified by static_file_root
-  explicit server(const std::string& address, const server_options* server_options_);
+  explicit Server(const std::string& address, const server_options* server_options_);
 
   // see if server is valid
   bool isValid(const std::string& address, const std::string& port);
@@ -43,13 +43,13 @@ public:
 
 private:
   /// Initiate an asynchronous accept operation.
-  void start_accept();
+  void startAccept();
 
   /// Handle completion of an asynchronous accept operation.
-  void handle_accept(const boost::system::error_code& e);
+  void handleAccept(const boost::system::error_code& e);
 
   /// Handle a request to stop the server.
-  void handle_stop();
+  void handleStop();
 
   /// The io_service used to perform asynchronous operations.
   boost::asio::io_service io_service_;
@@ -61,7 +61,7 @@ private:
   boost::asio::ip::tcp::acceptor acceptor_;
 
   /// The connection manager which owns all live connections.
-  connection_manager connection_manager_;
+  ConnectionManager connection_manager_;
 
   /// The next connection to be accepted.
   connection_ptr new_connection_;
