@@ -26,7 +26,7 @@ Server::Server(const std::string& address, const server_options* server_options)
 
   if (!isValid()) {
     std::cerr << "Config not valid. Exiting.\n";
-    exit(1);
+    return;
   }
 
   // Initialize echo request handler.

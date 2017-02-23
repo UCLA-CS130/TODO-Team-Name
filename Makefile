@@ -83,6 +83,12 @@ coverage:
 	gcov -r request_handler_static.cpp > $(RESULTS_COVERAGE_DIR)/request_handler_static_coverage
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/request_handler_notfound_test.cpp $(REQUEST_HANDLER_NOTFOUND_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o request_handler_notfound_test $(BOOST_FLAGS)
+	./request_handler_notfound_test > $(RESULTS_TEST_DIR)/request_handler_notfound_test_info
+	gcov -r request_handler_notfound.cpp > $(RESULTS_COVERAGE_DIR)/request_handler_notfound_coverage
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	$(TEST_DIR)/server_test.cpp $(SERVER_DEPENDENCIES) \
 	$(TEST_DIR)/libgtest.a -o server_test $(BOOST_FLAGS)
 	./server_test > $(RESULTS_TEST_DIR)/server_test_info
@@ -95,22 +101,28 @@ coverage:
 	gcov -r request_parser.cpp > $(RESULTS_COVERAGE_DIR)/request_parser_coverage
 
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
-	$(TEST_DIR)/reply_test.cpp $(REPLY_DEPENDENCIES) \
-	$(TEST_DIR)/libgtest.a -o reply_test $(BOOST_FLAGS)
-	./reply_test > $(RESULTS_TEST_DIR)/reply_test_info
-	gcov -r reply.cpp > $(RESULTS_COVERAGE_DIR)/reply_coverage
+	$(TEST_DIR)/response_test.cpp $(RESPONSE_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o response_test $(BOOST_FLAGS)
+	./response_test > $(RESULTS_TEST_DIR)/response_test_info
+	gcov -r response.cpp > $(RESULTS_COVERAGE_DIR)/response_coverage
 
-	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
-	$(TEST_DIR)/connection_test.cpp $(CONNECTION_DEPENDENCIES) \
-	$(TEST_DIR)/libgtest.a -o connection_test $(BOOST_FLAGS)
-	./connection_test > $(RESULTS_TEST_DIR)/connection_test_info
-	gcov -r connection.cpp > $(RESULTS_COVERAGE_DIR)/connection_coverage
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/request_test.cpp $(REQUEST_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o request_test $(BOOST_FLAGS)
+	./request_test > $(RESULTS_TEST_DIR)/request_test_info
+	gcov -r request.cpp > $(RESULTS_COVERAGE_DIR)/request_coverage
 
-	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
-	$(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
-	$(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
-	./connection_manager_test > $(RESULTS_TEST_DIR)/connection_manager_test_info
-	gcov -r connection_manager.cpp > $(RESULTS_COVERAGE_DIR)/connection_manager_coverage
+	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
+	# $(TEST_DIR)/connection_test.cpp $(CONNECTION_DEPENDENCIES) \
+	# $(TEST_DIR)/libgtest.a -o connection_test $(BOOST_FLAGS)
+	# ./connection_test > $(RESULTS_TEST_DIR)/connection_test_info
+	# gcov -r connection.cpp > $(RESULTS_COVERAGE_DIR)/connection_coverage
+
+	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
+	# $(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
+	# $(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
+	# ./connection_manager_test > $(RESULTS_TEST_DIR)/connection_manager_test_info
+	# gcov -r connection_manager.cpp > $(RESULTS_COVERAGE_DIR)/connection_manager_coverage
 
 integration:
 	./$(TEST_DIR)/integration_test.sh
