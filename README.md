@@ -1,4 +1,7 @@
-# CS130 Project - Web Server
+# CS 130 Project - Web Server
+
+## // TODO: Team Name
+## Matt Dragotto, Andy Kuang, McKenna Galvin
 
 A full HTTP web server, from the [boost documentation](http://www.boost.org/doc/libs/1_53_0/doc/html/boost_asio/examples.html). This code is an adapted version of the [HTTP server](http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/examples/cpp11_examples.html) example.
 
@@ -11,7 +14,7 @@ The server can be accessed via a variety of methods:
 * Use your browser to view the resource (for example, `http://localhost:8080/`).
 * Use a curl request: `curl -i -s localhost:8080`
 
-To test the static file handler, you can try some of the following commands (assuming the config file is kept the same):
+To test the static file handler, you can try requesting some of the following resources (assuming the config file is kept the same):
 * `localhost:8080/static1/index.html`
 * `localhost:8080/static2/ducks.jpg`
 
