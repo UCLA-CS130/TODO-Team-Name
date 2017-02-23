@@ -3,26 +3,28 @@
 #include "connection.hpp"
 #include "connection_manager.hpp"
 #include "request_handler.hpp"
+#include "request.hpp"
 
 class ConnectionTest : public ::testing::Test {
 protected:
 	bool isSocketOpen() {
-        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_);
+        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_, status_handler_);
         return conn->socket().is_open();
     }
     void startConn() {
-        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_);
+        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_, status_handler_);
         conn->start();
     }
     void stopConn() {
-        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_);
+        conn = new http::server::Connection(io_service, manager_, handlers_, default_handler_, status_handler_);
         conn->stop();
     }
     http::server::Connection* conn;
     boost::asio::io_service io_service;
     http::server::ConnectionManager manager_; 
-    std::map<std::string, RequestHandler*> handlers_;
-    RequestHandler* default_handler_;
+    std::map<std::string, http::server::RequestHandler*> handlers_;
+    http::server::RequestHandler* default_handler_;
+    http::server::RequestHandler* status_handler_;
 };
 
 TEST_F(ConnectionTest, SocketTest) {
