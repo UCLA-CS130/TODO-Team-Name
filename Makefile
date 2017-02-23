@@ -20,6 +20,7 @@ REQUEST_HANDLER_NOTFOUND_DEPENDENCIES=src/request_handler_notfound.cpp src/respo
 SERVER_DEPENDENCIES=src/server.cpp src/connection.cpp src/connection_manager.cpp src/response.cpp src/request.cpp src/request_handler_static.cpp src/request_handler_echo.cpp src/request_handler_notfound.cpp src/request_parser.cpp src/mime_types.cpp
 REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp
 RESPONSE_DEPENDENCIES=src/response.cpp
+REQUEST_DEPENDENCIES=src/request.cpp src/request_parser.cpp
 CONNECTION_DEPENDENCIES=src/connection.cpp src/connection_manager.cpp src/request_handler.hpp
 
 all: webserver 
@@ -51,6 +52,10 @@ test:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	$(TEST_DIR)/response_test.cpp $(RESPONSE_DEPENDENCIES) \
 	$(TEST_DIR)/libgtest.a -o response_test $(BOOST_FLAGS)
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/request_test.cpp $(REQUEST_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o request_test $(BOOST_FLAGS)
 
 	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
 	# $(TEST_DIR)/connection_test.cpp $(CONNECTION_DEPENDENCIES) \

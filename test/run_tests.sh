@@ -16,6 +16,8 @@ echo "Request Handler Not Found Test"
 ./request_handler_notfound_test
 echo "Response Test"
 ./response_test
+echo "Request Test"
+./request_test
 echo "Connection Test"
 ./connection_test
 echo "Connection Manager Test"
