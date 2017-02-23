@@ -66,9 +66,11 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
     extension = request_file.substr(last_dot_pos + 1);
   }
 
+  std::string file_name = request_file.substr(last_slash_pos+1);
+
   // TODO: dont open full path, only the file that we are asking for
   // Open the file to send back.
-  std::string full_path = root_ + request_file;
+  std::string full_path = root_ + file_name;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
     return RequestHandler::IOERROR;
