@@ -19,7 +19,7 @@ protected:
 TEST_F(EchoHandlerTest, SimpleRequest) {
 	std::string simple_request = "Testing";
 	HandleEchoRequest(simple_request);
-	std::string expected_response = "HTTP/1.0 200 OK\r\n"
+	std::string expected_response = "HTTP/1.1 200 OK\r\n"
 									"Content-Length: 7\r\n"
 									"Content-Type: text/plain\r\n\r\n" +
 									simple_request;
@@ -28,7 +28,7 @@ TEST_F(EchoHandlerTest, SimpleRequest) {
 
 TEST_F(EchoHandlerTest, EmptyRequest) {
 	HandleEchoRequest("");
-	std::string expected_response = "HTTP/1.0 200 OK\r\n"
+	std::string expected_response = "HTTP/1.1 200 OK\r\n"
 									"Content-Length: 0\r\n"
 									"Content-Type: text/plain\r\n\r\n";
 	EXPECT_EQ(resp.ToString(), expected_response);
@@ -40,7 +40,7 @@ TEST_F(EchoHandlerTest, BigRequest) {
 		big_request += "EchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEchoEcho";
 	}
 	HandleEchoRequest(big_request);
-	std::string expected_response = "HTTP/1.0 200 OK\r\n"
+	std::string expected_response = "HTTP/1.1 200 OK\r\n"
 									"Content-Length: " + std::to_string(big_request.length()) + "\r\n"
 									"Content-Type: text/plain\r\n\r\n" + big_request;
 	EXPECT_EQ(resp.ToString(), expected_response);

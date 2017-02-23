@@ -13,7 +13,7 @@ TEST(NotFoundHandlerTest, SimpleTest) {
 
 	std::string expected_html = "<html><head><title>Not Found</title></head>"
 								"<body><h1>404 Not Found</h1></body></html>";
-	std::string expected_response = "HTTP/1.0 404 Not Found\r\n"
+	std::string expected_response = "HTTP/1.1 404 Not Found\r\n"
 									"Content-Length: 85\r\n"
 									"Content-Type: text/html\r\n\r\n" +
 									expected_html;

@@ -30,8 +30,8 @@ protected:
 	http::server::StaticHandler handler;
 	std::unique_ptr<http::server::Request> req;
 	http::server::Response resp;
-	const std::string not_found = "HTTP/1.0 404 Not Found\r\n\r\n";
-	const std::string bad_request = "HTTP/1.0 400 Bad Request\r\n\r\n";
+	const std::string not_found = "HTTP/1.1 404 Not Found\r\n\r\n";
+	const std::string bad_request = "HTTP/1.1 400 Bad Request\r\n\r\n";
 };
 
 TEST_F(StaticHandlerTest, SimpleRequest) {
@@ -42,8 +42,8 @@ TEST_F(StaticHandlerTest, SimpleRequest) {
 		"<p>The webserver successfully served this static file YAY</p>\n\n"
 		"</body>\n</html>\n";
 
-	std::string expected_response = "HTTP/1.0 200 OK\r\n"
-									"Content-Length: 160\r\n"
+	std::string expected_response = "HTTP/1.1 200 OK\r\n"
+									"Content-Length: 141\r\n"
 									"Content-Type: text/html\r\n\r\n" +
 									expected_html;
 
