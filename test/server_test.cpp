@@ -7,35 +7,24 @@
 #include "server_options.hpp"
 #include <signal.h>
 
-// Server options for reference:
-// struct server_options {
-//   std::string port;
-//   std::string echo_handler;
-//   std::map<std::string, std::string> static_files_map;
-// };
+class ServerTest : public ::testing::Test {
+protected:
+	bool portValid(std::string port) {
+        server_options_.port = port;
+        http::server::Server server_("0.0.0.0", &server_options_);
+        return server_.isValid();
+    }
+    http::server::server_options server_options_;
+};
 
-TEST(ServerTest, PortTooBig) {
-	http::server::server_options server_options_;
-	server_options_.port = "12312312";
-	std::string addr = "0.0.0.0";
-
-	http::server::server server_(addr, &server_options_);
-	EXPECT_FALSE(server_.isValid(addr, server_options_.port));
+TEST_F(ServerTest, PortTooBig) {
+    EXPECT_EQ(portValid("12312312"), false);
 }
 
-TEST(ServerTest, PortIsNegative) {
-	http::server::server_options server_options_;
-	server_options_.port = "-1";
-	std::string addr = "0.0.0.0";
-	
-	EXPECT_ANY_THROW(http::server::server server_(addr, &server_options_));	
+TEST_F(ServerTest, NegativePort) {
+    EXPECT_EQ(portValid("-1"), false);
 }
 
-TEST(ServerTest, NoPort) {
-	http::server::server_options server_options_;
-	server_options_.port = "";
-	std::string addr = "0.0.0.0";
-
-	http::server::server server_(addr, &server_options_);
-	EXPECT_FALSE(server_.isValid(addr, server_options_.port));
+TEST_F(ServerTest, NoPortSpecified) {
+    EXPECT_EQ(portValid(""), false);
 }

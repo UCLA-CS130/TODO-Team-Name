@@ -17,13 +17,18 @@
 namespace http {
 namespace server {
 
-Server::Server(const std::string& address, const server_options* server_options_)
+Server::Server(const std::string& address, const server_options* server_options)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    server_options_(server_options_) {
+    server_options_(server_options) {
+
+  if (!isValid()) {
+    std::cerr << "Config not valid. Exiting.\n";
+    return;
+  }
 
   NginxConfig config;
   RequestHandler* handler_;
@@ -82,6 +87,22 @@ Server::Server(const std::string& address, const server_options* server_options_
   acceptor_.listen();
 
   startAccept();
+}
+
+bool Server::isValid() {
+  std::string port = server_options_->port;
+  if (port == "") {
+    std::cerr << "ERROR: Please specify a port.\n";
+    return false;
+  }
+
+  int port_as_num = std::stoi(port);
+  if (port_as_num > 65535 || port_as_num < 0) {
+    std::cerr << "ERROR: Port must be a valid number ranging from 0 to 65535.\n";
+    return false;
+  }
+
+  return true;
 }
 
 void Server::run() {

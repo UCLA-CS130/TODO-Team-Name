@@ -38,6 +38,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   // Decode url to path.
   std::string request_string;
   if (!url_decode(request.uri(), request_string)) {
+    response->SetStatus(Response::BAD_REQUEST);
     return RequestHandler::BAD_REQUEST;
   }
 
@@ -68,6 +69,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
 
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
+    response->SetStatus(Response::NOT_FOUND);
     return RequestHandler::NOT_FOUND;
   }
 

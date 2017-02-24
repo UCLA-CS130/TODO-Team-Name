@@ -33,10 +33,10 @@ class Server
 public:
   /// Construct the server to listen on the specified TCP address and port
   /// Serve static files from the directory specified by static_file_root
-  explicit Server(const std::string& address, const server_options* server_options_);
+  explicit Server(const std::string& address, const server_options* server_options);
 
-  // see if server is valid
-  bool isValid(const std::string& address, const std::string& port);
+  // Check that server parameters are valid
+  bool isValid();
 
   /// Run the server's io_service loop.
   void run();
