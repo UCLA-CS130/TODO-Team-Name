@@ -51,12 +51,12 @@ TEST_F(StaticHandlerTest, SimpleRequest) {
 }
 
 TEST_F(StaticHandlerTest, EmptyRequest) {
-	EXPECT_EQ(HandleStaticRequest("", "", ""), http::server::RequestHandler::IOERROR);
+	EXPECT_EQ(HandleStaticRequest("", "", ""), http::server::RequestHandler::NOT_FOUND);
 	EXPECT_EQ(resp.ToString(), not_found);
 }
 
 TEST_F(StaticHandlerTest, URLNotFound) {
-	EXPECT_EQ(HandleStaticRequest("static1", "", "thisWontWork.jpg"), http::server::RequestHandler::IOERROR);
+	EXPECT_EQ(HandleStaticRequest("static1", "", "thisWontWork.jpg"), http::server::RequestHandler::NOT_FOUND);
 	EXPECT_EQ(resp.ToString(), not_found);
 }
 
@@ -66,15 +66,15 @@ TEST_F(StaticHandlerTest, BadRequest) {
 }
 
 TEST_F(StaticHandlerTest, EscapeSpaceCharacter) {
-	EXPECT_EQ(HandleStaticRequest("static", "", "%20"), http::server::RequestHandler::IOERROR);
+	EXPECT_EQ(HandleStaticRequest("static", "", "%20"), http::server::RequestHandler::NOT_FOUND);
 	EXPECT_EQ(resp.ToString(), not_found);
 
-	EXPECT_EQ(HandleStaticRequest("static", "", "+"), http::server::RequestHandler::IOERROR);
+	EXPECT_EQ(HandleStaticRequest("static", "", "+"), http::server::RequestHandler::NOT_FOUND);
 	EXPECT_EQ(resp.ToString(), not_found);
 }
 
 TEST_F(StaticHandlerTest,NoFileExtension) {
-	EXPECT_EQ(HandleStaticRequest("static", "", "a"), http::server::RequestHandler::IOERROR);
+	EXPECT_EQ(HandleStaticRequest("static", "", "a"), http::server::RequestHandler::NOT_FOUND);
 	EXPECT_EQ(resp.ToString(), not_found);
 }
 
