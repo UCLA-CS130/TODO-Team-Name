@@ -116,5 +116,7 @@ bool StaticHandler::url_decode(const std::string& in, std::string& out) {
   return true;
 }
 
+REGISTER_REQUEST_HANDLER(StaticHandler);
+
 } // namespace server
 } // namespace http

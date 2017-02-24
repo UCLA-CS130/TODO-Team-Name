@@ -69,5 +69,8 @@ void StatusHandler::update(std::string uri, int respCode){
 	url_and_response_.push_back(std::make_pair(uri, std::to_string(respCode)));
 }
 
+
+REGISTER_REQUEST_HANDLER(StatusHandler);
+
 } // namespace server
 } // namespace http
