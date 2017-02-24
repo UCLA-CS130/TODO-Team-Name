@@ -69,6 +69,9 @@ private:
   /// Map of URL paths to Request Handlers.
   std::map<std::string, RequestHandler*> handlers_;
 
+  /// The status handler 
+  RequestHandler* status_handler_;
+
   /// The default request handler if no URL path matches.
   RequestHandler* default_handler_;
 

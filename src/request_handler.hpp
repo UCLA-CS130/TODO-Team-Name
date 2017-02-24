@@ -19,10 +19,11 @@ namespace server {
 class RequestHandler {
  public:
   enum Status {
-    OK = 0,
-    BAD_REQUEST = 1,
-    IOERROR = 2,
-    BAD_CONFIG = 3
+    OK = 200,
+    BAD_REQUEST = 400,
+    NOT_FOUND = 404,
+    INTERNAL_SERVER_ERROR = 500,
+    BAD_CONFIG = 1
   };
   
   // Initializes the handler. Returns a response code indicating success or

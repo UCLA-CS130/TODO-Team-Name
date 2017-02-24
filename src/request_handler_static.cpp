@@ -70,7 +70,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
     response->SetStatus(Response::NOT_FOUND);
-    return RequestHandler::IOERROR;
+    return RequestHandler::NOT_FOUND;
   }
 
   // Fill out the response to be sent to the client.

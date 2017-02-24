@@ -12,6 +12,7 @@
 #include <boost/bind.hpp>
 #include <signal.h>
 #include <iostream>
+#include "request_handler_status.hpp"
 
 namespace http {
 namespace server {
@@ -29,12 +30,13 @@ Server::Server(const std::string& address, const server_options* server_options)
     return;
   }
 
+  NginxConfig config;
+  RequestHandler* handler_;
   // Initialize echo request handler.
   for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
     std::string uri_prefix = server_options_->echo_handlers.at(i);
     // TODO: error handling based on the value of Status
-    RequestHandler* handler_ = new EchoHandler();
-    NginxConfig config;
+    handler_ = new EchoHandler();
     handler_->Init(uri_prefix, config);
     handlers_[uri_prefix] = handler_;
   }
@@ -44,15 +46,21 @@ Server::Server(const std::string& address, const server_options* server_options)
     std::string uri_prefix = it->first;
     NginxConfig* config = it->second;
     // Create handler.
-    RequestHandler* handler_ = new StaticHandler();
+    handler_ = new StaticHandler();
     handler_->Init(uri_prefix, *config);
     handlers_[uri_prefix] = handler_;
   }
 
-  // TODO: change how this works
+  // Initialize status handler.
+  std::string uri_prefix = server_options_->status_handler;
+  handler_ = new StatusHandler();
+  handler_->Init(uri_prefix, config);
+  dynamic_cast<StatusHandler*>(handler_)->SetHandlers(server_options_->all_handlers);
+  handlers_[uri_prefix] = handler_;
+  status_handler_ = handler_;
+
   // Initialize default handler.
-  RequestHandler* handler_ = new NotFoundHandler();
-  NginxConfig config;
+  handler_ = new NotFoundHandler();
   handler_->Init("", config);
   default_handler_ = handler_;
 
@@ -107,7 +115,7 @@ void Server::run() {
 
 void Server::startAccept() {
   new_connection_.reset(new Connection(io_service_,
-        connection_manager_, handlers_, default_handler_));
+        connection_manager_, handlers_, default_handler_, status_handler_));
   acceptor_.async_accept(new_connection_->socket(),
       boost::bind(&Server::handleAccept, this,
         boost::asio::placeholders::error));
