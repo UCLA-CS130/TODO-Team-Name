@@ -25,8 +25,8 @@ public:
 
 private:
 
-  int TotalRequests; // How many requests has the server received? 
-  std::vector<std::pair<std::string, std::string>> url_and_response; //Break this down by URL requested and the response code returned (200, 400, etc.).
+  int total_requests_; // How many requests has the server received? 
+  std::vector<std::pair<std::string, std::string>> url_and_response_; //Break this down by URL requested and the response code returned (200, 400, etc.).
   std::vector<std::pair<std::string, std::string>> handlers_; // What request handlers exist, and for what URL prefixes?
 
 };

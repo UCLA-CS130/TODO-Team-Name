@@ -120,15 +120,19 @@ void Connection::handleRead(const boost::system::error_code& e,
     request_ = Request::Parse(raw_req);
 
     // Pick a handler and handle the request.
-    auto stat_code = chooseHandler()->HandleRequest(*request_, response_);
+    auto handler_status = chooseHandler()->HandleRequest(*request_, response_);
 
-    // Status handler.
-    dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), stat_code);
-
-    // TODO: Do things depending on status code
-    if (stat_code){
-      std::cerr << "Error: handler returned status code " << stat_code << ".\n";
+    // If request handling failed, invoke NotFound handler
+    // (In the future, we could invoke different handlers based on the type of
+    // error that occured, but for now just send everything bad to 404!) 
+    if (handler_status != RequestHandler::OK) {
+      std::cerr << "Error: handler returned status code " << handler_status << ".\n";
+      std::cerr << "Invoking default handler.\n";
+      default_handler_->HandleRequest(*request_, response_);
     }
+
+    // Let status handler know the result.
+    dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), handler_status);
 
     // Write response to socket.
     std::vector<boost::asio::const_buffer> buffers;
