@@ -96,6 +96,9 @@ private:
   /// The incoming request.
   std::unique_ptr<Request> request_;
 
+  // Buffers for write
+  std::vector<boost::asio::const_buffer> buffers_;
+
   /// The response to be sent back to the client.
   Response* response_;
 };
