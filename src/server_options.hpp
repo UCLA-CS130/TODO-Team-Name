@@ -1,6 +1,6 @@
 //
 // server_options.hpp
-// 
+//
 
 #ifndef SERVER_OPTIONS_HPP
 #define SERVER_OPTIONS_HPP
@@ -22,6 +22,9 @@ struct server_options {
   // Map of static handlers (key is the path, value is the
   // NginxConfig child block containing the root info)
   std::map<std::string, NginxConfig*> static_handlers;
+
+  // Same as above for proxy handlers
+  std::map<std::string, NginxConfig*> proxy_handlers;
 
   // Status Handler
   std::string status_handler;

@@ -5,10 +5,10 @@ make
 
 # Start the server
 echo "Running an integration test on the server"
-echo "server { listen 8080;
-path /echo EchoHandler;
-path /static1 StaticFileHandler { root www; }
-path /static2 StaticFileHandler { root pics; } }" >> test_config
+echo "port 8080;
+path /echo EchoHandler {}
+path /static1 StaticHandler { root www; }
+path /static2 StaticHandler { root pics; }" > test_config
 ./webserver test_config &>/dev/null &
 
 # Send a request to the server using curl
@@ -20,7 +20,7 @@ curl -s localhost:8080/static2/giphy.gif > test_output_static2_gif
 curl -s localhost:8080/static2/mario.jpeg > test_output_static2_jpeg
 
 # Verify the response from the server works as expected
-diff expected_echo_output test_output_echo > diff_echo_output
+diff test/expected_echo_output test_output_echo > diff_echo_output
 EXIT_STATUS+=$?
 diff www/index.html test_output_static1 > diff_static1_output
 EXIT_STATUS+=$?
