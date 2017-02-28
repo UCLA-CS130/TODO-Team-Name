@@ -9,7 +9,7 @@ GTEST_IMPORT=-I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc
 GMOCK_IMPORT=-I$(GMOCK_PATH)/include
 TEST_DIR=test
 TEST_FILES=$(TEST_DIR)/*.cpp
-BOOST_FLAGS=-lpthread -lboost_system
+BOOST_FLAGS=-lpthread -lboost_system -lboost_thread
 RESULTS_TEST_DIR=results-unit-tests
 RESULTS_COVERAGE_DIR=results-coverage
 
@@ -65,6 +65,9 @@ test:
 	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
 	# $(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
 	# $(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
+
+client:  client.cpp
+	g++ $(CXXFLAGS) -I. client.cpp -o client $(BOOST_FLAGS)
 
 coverage: CXXFLAGS+=-coverage
 coverage:
