@@ -51,7 +51,7 @@ fi
 echo "Cleaning up and shutting down"
 pkill webserver
 make clean
-test_config
+rm test_config
 rm test_output_echo
 rm test_output_static1
 rm test_output_static2_jpg
