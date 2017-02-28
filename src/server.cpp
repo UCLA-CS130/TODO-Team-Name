@@ -51,6 +51,16 @@ Server::Server(const std::string& address, const server_options* server_options)
     handlers_[uri_prefix] = handler_;
   }
 
+  // Initialize proxy handlers.
+  for (auto it = server_options_->proxy_handlers.begin(); it != server_options_->proxy_handlers.end(); ++it) {
+    std::string uri_prefix = it->first;
+    NginxConfig* config = it->second;
+    // Create handler.
+    handler_ = RequestHandler::CreateByName("ProxyHandler");
+    handler_->Init(uri_prefix, *config);
+    handlers_[uri_prefix] = handler_;
+  }
+
   // Initialize status handler.
   std::string uri_prefix = server_options_->status_handler;
   handler_ = RequestHandler::CreateByName("StatusHandler");
