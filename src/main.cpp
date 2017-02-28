@@ -54,6 +54,11 @@ void getServerOptions(NginxConfig config, http::server::server_options *server_o
       else if (statement.at(2) == "StatusHandler") {
         server_options_pointer->status_handler = statement.at(1);
       }
+      // Proxy
+      else if (statement.at(2) == "ProxyHandler") {
+        server_options_pointer->proxy_handlers[statement.at(1)] = config_line->child_block_;
+      }
+
       server_options_pointer->all_handlers.push_back(std::make_pair(statement.at(2), statement.at(1)));
     }
 
@@ -102,7 +107,11 @@ void printParsedConfig(http::server::server_options *server_options_pointer) {
   for (auto it = server_options_pointer->static_handlers.begin(); it != server_options_pointer->static_handlers.end(); ++it) {
     std::cout << "Static Handler "<< it->first << "\n";
   }
-  
+
+  for (auto it = server_options_pointer->proxy_handlers.begin(); it != server_options_pointer->proxy_handlers.end(); ++it) {
+    std::cout << "Proxy Handler "<< it->first << "\n";
+  }
+
   std::cout << "Default Handler " << server_options_pointer->default_handler << "\n";
   std::cout << "Status Handler " << server_options_pointer->status_handler << "\n";
   std::cout << "*******************************" << "\n";
