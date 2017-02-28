@@ -17,55 +17,114 @@
 namespace http {
 namespace server {
 
-Server::Server(const std::string& address, const server_options* server_options)
+// Given a parsed config file, set the port and handlers
+bool Server::parseConfig(std::string& err) {
+
+  // Iterate over statements in parsed config.
+  for (unsigned int i = 0; i < config_->statements_.size(); i++) {
+    std::shared_ptr<NginxConfigStatement> config_line = config_->statements_.at(i);
+    std::vector<std::string> statement = config_line->tokens_;
+
+    // Port
+    if (statement.size() == 2 && statement.at(0) == "port") {
+      port_ = statement.at(1);
+    }
+
+    // Threads
+    if (statement.size() == 2 && statement.at(0) == "threads") {
+      numThreads_ = std::stoi(statement.at(1));
+    }
+
+    // Handlers
+    if (statement.size() == 3 && statement.at(0) == "path") {
+      // Use registerer to try and create by name
+      RequestHandler* handler = RequestHandler::CreateByName(statement.at(2).c_str());
+
+      // nullptr signifies that no handler of that type was registered
+      if (handler == nullptr) {
+        err = "ERROR: Handler: " + statement.at(2) + " Not Found\n";
+        return false;
+      }
+      else if (handlers_.find(statement.at(1)) != handlers_.end()) {
+        err = "ERROR: Duplicate Path: " + statement.at(1) + "\n";
+        return false;
+      }
+      else{
+        handler->Init(statement.at(1), *config_line->child_block_);
+        handlers_[statement.at(1)] = handler;
+        all_handlers.push_back(std::make_pair(statement.at(2), statement.at(1)));
+        // Special case: status handler
+        if (statement.at(2) == "StatusHandler"){
+            status_handler_ = handler;
+        }
+      }
+    }
+
+    // Default
+    if (statement.size() == 2 && statement.at(0) == "default") {
+      // Use registerer to try and create by name
+      default_handler_ = RequestHandler::CreateByName(statement.at(1).c_str());
+      // nullptr signifies that no handler of that type was registered
+      if (default_handler_ == nullptr) {
+        err = "ERROR: Handler: " + statement.at(1) + " Not Found\n";
+        return false;
+      }
+      else{
+        default_handler_->Init("", *config_line->child_block_);
+        handlers_[""] = default_handler_;
+        //all_handlers.push_back(std::make_pair(statement.at(2), statement.at(1)));
+        default_handler_name = statement.at(1);
+      }
+    }
+  }
+
+  if (port_ == "") {
+    err = "ERROR: Please specify a port.\n";
+    return false;
+  }
+
+  int port_as_num = std::stoi(port_);
+  if (port_as_num > 65535 || port_as_num < 0) {
+    err = "ERROR: Port must be a valid number ranging from 0 to 65535.\n";
+    return false;
+  }
+
+  return true;
+}
+
+void Server::printParsedConfig() {
+  std::cout << "******** PARSED CONFIG ********\n";
+  std::cout << "Port: " << port_ << "\n";
+  std::cout << "Threads: " << std::to_string(numThreads_) << "\n";
+  for (std::vector<int>::size_type i = 0; i != all_handlers.size(); i++) {
+    std::cout << all_handlers[i].first << " " << all_handlers[i].second << "\n";
+  }
+  std::cout << default_handler_name << " is the default handler\n";
+  std::cout << "*******************************" << "\n";
+}
+
+Server::Server(const std::string& address, const NginxConfig* config)
   : io_service_(),
     signals_(io_service_),
     acceptor_(io_service_),
     connection_manager_(),
     new_connection_(),
-    server_options_(server_options) {
+    config_(config) {
 
-  if (!isValid()) {
-    std::cerr << "Config not valid. Exiting.\n";
-    return;
+  // Parse the config, setting port, numThreads and creating handlers
+  std::string err;
+  if (!parseConfig(err)) {
+    std::cerr << "ERROR: failed to parse config.\n";
+    std::cerr << err << "\n";
   }
 
-  NginxConfig config;
-  RequestHandler* handler_;
-  // Initialize echo request handler.
-  for (unsigned int i = 0; i < server_options_->echo_handlers.size(); i++) {
-    std::string uri_prefix = server_options_->echo_handlers.at(i);
-    // TODO: error handling based on the value of Status
-    handler_ = RequestHandler::CreateByName("EchoHandler");
-    handler_->Init(uri_prefix, config);
-    handlers_[uri_prefix] = handler_;
+  printParsedConfig();
+
+  // Check if a status handler was specified 
+  if (status_handler_ != nullptr) {
+    // Tell status handler about the other handlers
+    dynamic_cast<StatusHandler*>(status_handler_)->SetHandlers(all_handlers);
   }
-
-  // Initialize static handlers.
-  for (auto it = server_options_->static_handlers.begin(); it != server_options_->static_handlers.end(); ++it) {
-    std::string uri_prefix = it->first;
-    NginxConfig* config = it->second;
-    // Create handler.
-    handler_ = RequestHandler::CreateByName("StaticHandler");
-    handler_->Init(uri_prefix, *config);
-    handlers_[uri_prefix] = handler_;
-  }
-
-  // Initialize status handler.
-  std::string uri_prefix = server_options_->status_handler;
-  handler_ = RequestHandler::CreateByName("StatusHandler");
-  handler_->Init(uri_prefix, config);
-  dynamic_cast<StatusHandler*>(handler_)->SetHandlers(server_options_->all_handlers);
-  handlers_[uri_prefix] = handler_;
-  status_handler_ = handler_;
-
-  // Initialize default handler.
-  handler_ = RequestHandler::CreateByName("NotFoundHandler");
-  handler_->Init("", config);
-  default_handler_ = handler_;
-
-  // Get the port.
-  std::string port = server_options_->port;
 
   // Register to handle the signals that indicate when the server should exit.
   // It is safe to register for the same signal multiple times in a program,
@@ -79,7 +138,7 @@ Server::Server(const std::string& address, const server_options* server_options)
 
   // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
   boost::asio::ip::tcp::resolver resolver(io_service_);
-  boost::asio::ip::tcp::resolver::query query(address, port);
+  boost::asio::ip::tcp::resolver::query query(address, port_);
   boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve(query);
   acceptor_.open(endpoint.protocol());
   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
@@ -87,22 +146,6 @@ Server::Server(const std::string& address, const server_options* server_options)
   acceptor_.listen();
 
   startAccept();
-}
-
-bool Server::isValid() {
-  std::string port = server_options_->port;
-  if (port == "") {
-    std::cerr << "ERROR: Please specify a port.\n";
-    return false;
-  }
-
-  int port_as_num = std::stoi(port);
-  if (port_as_num > 65535 || port_as_num < 0) {
-    std::cerr << "ERROR: Port must be a valid number ranging from 0 to 65535.\n";
-    return false;
-  }
-
-  return true;
 }
 
 void Server::run() {
