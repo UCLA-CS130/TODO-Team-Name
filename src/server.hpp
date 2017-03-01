@@ -19,12 +19,9 @@
 #include "request_handler_echo.hpp"
 #include "request_handler_static.hpp"
 #include "request_handler_notfound.hpp"
-#include "server_options.hpp"
 
 namespace http {
 namespace server {
-
-struct server_options;
 
 /// The top-level class of the HTTP server.
 class Server
@@ -33,10 +30,13 @@ class Server
 public:
   /// Construct the server to listen on the specified TCP address and port
   /// Serve static files from the directory specified by static_file_root
-  explicit Server(const std::string& address, const server_options* server_options);
+  explicit Server(const std::string& address, const NginxConfig* config);
 
-  // Check that server parameters are valid
-  bool isValid();
+  // Parses config
+  bool parseConfig(std::string& err);
+
+  // Prints out config specs
+  void printParsedConfig();
 
   /// Run the server's io_service loop.
   void run();
@@ -69,14 +69,24 @@ private:
   /// Map of URL paths to Request Handlers.
   std::map<std::string, RequestHandler*> handlers_;
 
+  // Pairs of handler names and their paths
+  std::vector<std::pair<std::string, std::string>> all_handlers;
+
   /// The status handler 
   RequestHandler* status_handler_;
 
   /// The default request handler if no URL path matches.
+  std::string default_handler_name;
   RequestHandler* default_handler_;
 
-  //pointer to server_options
-  const server_options* server_options_;
+  /// The port on which the server is running
+  std::string port_;
+
+  // Threads
+  int numThreads_;
+
+  //pointer to config
+  const NginxConfig* config_;
 };
 
 } // namespace server
