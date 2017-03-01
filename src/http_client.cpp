@@ -13,12 +13,12 @@
 namespace http {
 namespace server {
 
-bool HttpClient::EstablishConnection(const std::string& host, const std::string& protocol) {
+bool HttpClient::EstablishConnection(const std::string& host, const std::string& port) {
   boost::asio::io_service io_service;
 
   // Get a list of endpoints corresponding to the server name.
   tcp::resolver resolver(io_service);
-  tcp::resolver::query query(host, protocol);
+  tcp::resolver::query query(host, port);
   tcp::resolver::iterator endpoint_iterator = resolver.resolve(query), end;
 
   // Try each endpoint until we successfully establish a connection.
@@ -29,7 +29,7 @@ bool HttpClient::EstablishConnection(const std::string& host, const std::string&
 
   if(error) {
     //error_code means binding the socket failed
-    std::cerr << "Unable to bind socket to website " + host + " for " + protocol << std::endl;
+    std::cerr << "Unable to bind socket to website " + host + " for " + port << std::endl;
     return false;
   }
 

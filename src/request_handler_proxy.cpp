@@ -22,38 +22,51 @@ RequestHandler::Status ProxyHandler::Init(const std::string& uri_prefix, const N
   // Get root directory from config.
 	if (statements.size() == 1) {
     std::vector<std::string> statement_tokens = statements.at(0)->tokens_;
-    if (statement_tokens.size() == 2 && statement_tokens.at(0) == "url") {
+    if (statement_tokens.size() == 2 && statement_tokens.at(0) == "proxy_pass") {
       std::string full_url = statement_tokens.at(1);
 
-      std::string::size_type protocol_pos = full_url.find("//");
-      if(protocol_pos == std::string::npos) {
-        std::cout << "ProxyHandler " << uri_prefix << " didn't specify protocol. Using default http" << std::endl;
-        protocol_ = "http";
+      port_ = "80"; // default port to 80
 
-        std::string::size_type host_pos = full_url.find('/');
-        if(host_pos != std::string::npos) {
-          host_ = full_url.substr(0, host_pos);
-          path_ = full_url.substr(host_pos);
+      std::string::size_type colon_pos = full_url.find(':');
+      // Found colon, so set host with contents before colon
+      if(colon_pos != std::string::npos) {
+        host_ = full_url.substr(0, colon_pos);
+        
+        std::string::size_type slash_pos = full_url.find('/');
+        // Found slash, so set port between colon and slash
+        // Also set path with everything "/" and after
+        if(slash_pos != std::string::npos) {
+          port_ = full_url.substr(colon_pos + 1, slash_pos - colon_pos - 1);
+          path_ = full_url.substr(slash_pos);
         }
+        // No slash, so set port until end and path with default "/"
+        else {
+          port_ = full_url.substr(colon_pos + 1);
+          path_ = "/";
+        }
+      }
+      // No colon found, so keep default port
+      else {
+        std::cout << "ProxyHandler " << uri_prefix << " didn't specify port. Using default 80" << std::endl;
+
+        std::string::size_type slash_pos = full_url.find('/');
+        // Found slash, so set host from beginning to slash
+        // Also set path with everything "/" and after
+        if(slash_pos != std::string::npos) {
+          host_ = full_url.substr(0, slash_pos);
+          path_ = full_url.substr(slash_pos);
+        }
+        // No slash, so set host until end and path with default "/"
         else {
           host_ = full_url;
           path_ = "/";
         }
       }
-      else {
-        protocol_ = full_url.substr(0, protocol_pos - 1);
 
-        std::string::size_type host_pos = full_url.find('/', protocol_pos + 2);
-        if(host_pos != std::string::npos) {
-          host_ = full_url.substr(protocol_pos + 2, host_pos - protocol_pos - 2);
-          path_ = full_url.substr(host_pos);
-        }
-        else {
-          host_ = full_url.substr(protocol_pos + 2);
-          path_ = "/";
-        }
+      if(host_ == "localhost") {
+        host_ = "";
       }
-
+  
       return RequestHandler::OK;
     }
   }
@@ -70,7 +83,7 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
 
   if(resp->GetStatus() == Response::FOUND) {
 	  std::cout << "redirecting" << std::endl;
-	if(!resp->GetRedirectHostAndPath(host_, path_, protocol_)) {
+	if(!resp->GetRedirectHostAndPath(host_, path_, port_)) {
 	  return RequestHandler::INTERNAL_SERVER_ERROR;
 	}
     Request redirect_request = TransformRedirect(new_request);
@@ -79,7 +92,7 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
       return RequestHandler::INTERNAL_SERVER_ERROR;
     }
   }
-`
+
   (*response) = (*resp);
 
   return RequestHandler::OK;
@@ -106,7 +119,7 @@ Request ProxyHandler::TransformRedirect(const Request& request) const {
 
 Response* ProxyHandler::RunOutsideRequest(const Request& request) const {
   HttpClient c;
-  c.EstablishConnection(host_, protocol_);
+  c.EstablishConnection(host_, port_);
   auto resp = c.SendRequest(request);
   return resp;
 }

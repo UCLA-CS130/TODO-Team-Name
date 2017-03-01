@@ -28,7 +28,7 @@ private:
 
   std::string host_;
   std::string path_;
-  std::string protocol_;
+  std::string port_;
 };
 
 } // namespace server
