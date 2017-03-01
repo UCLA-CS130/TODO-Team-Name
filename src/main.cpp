@@ -40,6 +40,11 @@ void getServerOptions(NginxConfig config, http::server::server_options *server_o
       server_options_pointer->port = statement.at(1);
     }
 
+    // Threads
+    if (statement.size() == 2 && statement.at(0) == "threads") {
+      server_options_pointer->numThreads = std::stoi(statement.at(1));
+    }
+
     // Handlers
     if (statement.size() == 3 && statement.at(0) == "path") {
       // Echo
@@ -99,6 +104,8 @@ bool parseConfig(char * config_file, http::server::server_options *server_option
 void printParsedConfig(http::server::server_options *server_options_pointer) {
   std::cout << "******** PARSED CONFIG ********\n";
   std::cout << "Port: " << server_options_pointer->port << "\n";
+
+  std::cout << "Threads: " << std::to_string(server_options_pointer->numThreads) << "\n";
 
   for (unsigned int i = 0; i < server_options_pointer->echo_handlers.size(); i++) {
     std::cout << "Echo Handler " << server_options_pointer->echo_handlers.at(i) << "\n";

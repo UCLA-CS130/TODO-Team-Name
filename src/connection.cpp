@@ -147,11 +147,9 @@ void Connection::handleRead(const boost::system::error_code& e,
     dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), handler_status);
 
     // Write response to socket.
-    std::vector<boost::asio::const_buffer> buffers;
-    std::string response_string = response_->ToString();
-
-    buffers.push_back(boost::asio::buffer(response_string));
-    boost::asio::async_write(socket_, buffers,
+    response_string = response_->ToString();
+    buffers_.push_back(boost::asio::buffer(response_string));
+    boost::asio::async_write(socket_, buffers_,
           boost::bind(&Connection::handleWrite, shared_from_this(),
             boost::asio::placeholders::error));
   }
