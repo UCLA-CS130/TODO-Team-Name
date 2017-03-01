@@ -107,6 +107,18 @@ RequestHandler* Connection::chooseHandler() {
       best_handler = it->second;
     }
   }
+
+  // if still equal to default handler, look for root path "/"
+  if(best_handler == default_handler_) {
+    for (auto it = handlers_.begin(); it != handlers_.end(); ++it) {
+      std::string uri_prefix = it->first;
+      if(uri_prefix == "/") {
+        best_handler = it->second;
+        break;
+      }
+    }
+  }
+
   // Invoke the handler.
   return best_handler;
 }
@@ -137,6 +149,7 @@ void Connection::handleRead(const boost::system::error_code& e,
     // Write response to socket.
     std::vector<boost::asio::const_buffer> buffers;
     std::string response_string = response_->ToString();
+
     buffers.push_back(boost::asio::buffer(response_string));
     boost::asio::async_write(socket_, buffers,
           boost::bind(&Connection::handleWrite, shared_from_this(),
