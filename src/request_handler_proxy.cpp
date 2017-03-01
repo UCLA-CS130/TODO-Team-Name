@@ -41,6 +41,10 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
     return RequestHandler::INTERNAL_SERVER_ERROR;
   }
 
+  // add corresponding uri_prefix_ to all html paths
+  // Not implemented due to errors
+  // resp->AddRelativePaths(uri_prefix_);
+
   (*response) = (*resp);
 
   return RequestHandler::OK;

@@ -71,6 +71,20 @@ Response* Response::Parse(const std::string& raw_res)
   }
 }
 
+/*
+void Response::AddRelativePaths(const std::string& uri_prefix) {
+  boost::regex re_js("(<script src=\")(/.*?)(\">)");
+  std::string fmt_js("?2$1" + uri_prefix + "$2$3");
+  body_ = boost::regex_replace(body_, re_js, fmt_js, boost::match_default | boost::format_all);
+  
+  boost::regex re_css("(<link rel=.*? href=\")(/.*?)(\">)");
+  std::string fmt_css("?2$1" + uri_prefix + "$2$3");
+  body_ = boost::regex_replace(body_, re_css, fmt_css, boost::match_default | boost::format_all);
+
+  //std::string result = boost::regex_replace(body_, re, newtext);
+}
+*/
+
 //parse the first line of the response
 bool Response::parse_first_line(const std::string& line) {
   std::vector<std::string> tokens;
@@ -111,7 +125,7 @@ Response::ResponseCode Response::IntToResponseCode(int code) {
 bool Response::parse_raw_response(const std::string& res) {
   std::vector<std::string> lines;
 
-  //separate the resuest body, denoted by \r\n\r\n.
+  //separate the request body, denoted by \r\n\r\n.
   //if there is any content after, update value of body_.
   size_t end_fields_index = res.find("\r\n\r\n");
 
@@ -122,7 +136,7 @@ bool Response::parse_raw_response(const std::string& res) {
   }
   size_t begin_body_index = end_fields_index + 4; //Add 4 to skip to the body.
   if(begin_body_index < res.size())
-    body_ = res.substr(begin_body_index, res.size() - begin_body_index);
+    body_ = res.substr(begin_body_index);
 
   //truncate res to everything before the \r\n\r\n
   std::string new_res = res.substr(0, end_fields_index + 1);
@@ -160,7 +174,6 @@ bool Response::parse_raw_response(const std::string& res) {
 
   return true;
 }
-
 
 } // namespace server
 } // namespace http

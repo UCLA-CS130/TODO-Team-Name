@@ -84,8 +84,6 @@ int Connection::longestSubstring(std::deque<std::string> req, std::deque<std::st
 }
 
 RequestHandler* Connection::chooseHandler() {
-  std::cout << request_->uri() << std::endl;
-
   // Create a response
   response_ = new Response();
 

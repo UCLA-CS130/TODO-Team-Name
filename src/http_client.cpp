@@ -55,7 +55,6 @@ Response* HttpClient::SendRequest(const Request& req) {
     // Read the values from the buffer (all bytes read)
     std::string read_data = std::string(boost::asio::buffers_begin(raw_response_stream.data()),
                       boost::asio::buffers_begin(raw_response_stream.data()) + bytes_read);
-    std::cout << read_data;
     raw_response_string += read_data;
     // Remove the bytes read from the buffer
     raw_response_stream.consume(bytes_read);
