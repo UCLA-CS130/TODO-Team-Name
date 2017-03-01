@@ -37,7 +37,7 @@ public:
 
   // get version
   std::string getVersion(){
-    return std::to_string(http_version_major) + '.' + std::to_string(http_version_minor);
+    return "HTTP/" + std::to_string(http_version_major_) + '.' + std::to_string(http_version_minor_);
   }
 
   // get method
