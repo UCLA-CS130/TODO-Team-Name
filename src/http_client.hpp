@@ -20,7 +20,7 @@ namespace server {
 
 class HttpClient {
 public:
-	bool EstablishConnection(const std::string& host, const std::string& protocol="http");
+	bool EstablishConnection(const std::string& host, const std::string& port);
 	Response* SendRequest(const Request& req);
 private:
 	boost::asio::ip::tcp::socket* socket_;
