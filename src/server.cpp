@@ -13,6 +13,8 @@
 #include <signal.h>
 #include <iostream>
 #include "request_handler_status.hpp"
+#include <boost/thread.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace http {
 namespace server {
@@ -110,15 +112,15 @@ void Server::run() {
   // have finished. While the server is running, there is always at least one
   // asynchronous operation outstanding: the asynchronous accept call waiting
   // for new incoming connections.
-  std::vector<boost::unique_ptr<boost::thread>> threadArray;
+  std::vector<boost::shared_ptr<boost::thread>> threadArray;
 
-  for (int i = 0; i < server_options.numThreads; i++){
-    boost::unique_ptr<boost::thread> temp(new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_)));
+  for (int i = 0; i < server_options_->numThreads; i++){
+    boost::shared_ptr<boost::thread> temp(new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_)));
+    threadArray.push_back(temp);
   }
-  threadArray.push_back(temp);
 
-  for (int i = 0; i < numThreads; i++){
-    threads[i].join();
+  for (int i = 0; i < server_options_->numThreads; i++){
+    threadArray[i]->join();
   }
 }
 
