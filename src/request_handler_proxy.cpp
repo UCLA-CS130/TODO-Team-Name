@@ -68,7 +68,7 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
     return RequestHandler::INTERNAL_SERVER_ERROR;
   }
 
-  if(resp.GetStatus() == ResponseCode::FOUND) {
+  if(resp->GetStatus() == Response::FOUND) {
     //host_ = // GET NEW LOCATION HERE FROM 302 in Location:
     Request redirect_request = TransformRequest(new_request);
     resp = RunOutsideRequest(redirect_request);

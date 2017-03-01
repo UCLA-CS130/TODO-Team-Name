@@ -14,7 +14,7 @@
 namespace http {
 namespace server {
 
-ResponseCode Response::GetStatus() {
+Response::ResponseCode Response::GetStatus() {
   return status_;
 }
 
