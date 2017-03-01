@@ -23,6 +23,10 @@ struct server_options {
   // NginxConfig child block containing the root info)
   std::map<std::string, NginxConfig*> static_handlers;
 
+  // Status Handler
+  std::string status_handler;
+  std::vector<std::pair<std::string, std::string>> all_handlers;
+
   // Default response handler
   std::string default_handler;
 };

@@ -5,6 +5,7 @@
 
 #include "response.hpp"
 #include <string>
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 
 namespace http {
@@ -29,16 +30,16 @@ std::string Response::ToString() {
   // Response code
   switch(status_) {
     case OK:
-      response_string += "HTTP/1.0 200 OK" + carriage_return;
+      response_string += "HTTP/1.1 200 OK" + carriage_return;
       break;
     case BAD_REQUEST:
-      response_string += "HTTP/1.0 400 Bad Request" + carriage_return;
+      response_string += "HTTP/1.1 400 Bad Request" + carriage_return;
       break;
     case NOT_FOUND:
-      response_string += "HTTP/1.0 404 Not Found" + carriage_return;
+      response_string += "HTTP/1.1 404 Not Found" + carriage_return;
       break;
     default:
-      response_string += "HTTP/1.0 500 Internal Server Error" + carriage_return;
+      response_string += "HTTP/1.1 500 Internal Server Error" + carriage_return;
       break;
   }
 

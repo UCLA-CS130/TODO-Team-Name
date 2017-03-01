@@ -20,6 +20,7 @@
 #include "request_handler.hpp"
 #include "request.hpp"
 #include "response.hpp"
+#include "request_handler_status.hpp"
 
 namespace http {
 namespace server {
@@ -27,11 +28,13 @@ namespace server {
 Connection::Connection(boost::asio::io_service& io_service,
     ConnectionManager& manager,
     std::map<std::string, RequestHandler*> handlers,
-    RequestHandler* default_handler)
+    RequestHandler* default_handler,
+    RequestHandler* status_handler)
   : socket_(io_service),
     connection_manager_(manager),
     handlers_(handlers),
-    default_handler_(default_handler)
+    default_handler_(default_handler),
+    status_handler_(status_handler)
 {
   clearBuffer();
 }
@@ -102,7 +105,6 @@ RequestHandler* Connection::chooseHandler() {
     if (quality > max) {
       max = quality;
       best_handler = it->second;
-      std::cerr << "Best handler is: " << uri_prefix << "\n";
     }
   }
   // Invoke the handler.
@@ -118,13 +120,19 @@ void Connection::handleRead(const boost::system::error_code& e,
     request_ = Request::Parse(raw_req);
 
     // Pick a handler and handle the request.
-    auto stat_code = chooseHandler()->HandleRequest(*request_, response_);
+    auto handler_status = chooseHandler()->HandleRequest(*request_, response_);
 
-    //TODO: different handlers for different status codes.
-    if (stat_code){
+    // If request handling failed, invoke NotFound handler
+    // (In the future, we could invoke different handlers based on the type of
+    // error that occured, but for now just send everything bad to 404!) 
+    if (handler_status != RequestHandler::OK) {
+      std::cerr << "Error: handler returned status code " << handler_status << ".\n";
+      std::cerr << "Invoking default handler.\n";
       default_handler_->HandleRequest(*request_, response_);
-      std::cerr << "Error: handler returned status code " << stat_code << ".\n";
     }
+
+    // Let status handler know the result.
+    dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), handler_status);
 
     // Write response to socket.
     std::vector<boost::asio::const_buffer> buffers;

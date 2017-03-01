@@ -38,32 +38,29 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   // Decode url to path.
   std::string request_string;
   if (!url_decode(request.uri(), request_string)) {
-    return RequestHandler::BAD_REQUEST;
-  }
-
-  // Gets the desired path.
-  std::string request_path = request_string.substr(0, request_string.find('/', 1));
-
-  // This string contains the actual path to the file.
-  std::string request_file = request_string.substr(request_string.find(request_path)+request_path.length());
-
-  // Request path must be absolute and not contain "..".
-  if (request_file.empty() || request_file[0] != '/'
-      || request_file.find("..") != std::string::npos) {
+    response->SetStatus(Response::BAD_REQUEST);
     return RequestHandler::BAD_REQUEST;
   }
 
   // If path ends in slash (i.e. is a directory) then add "index.html".
-  if (request_file[request_file.size() - 1] == '/') {
-    request_file += "/index.html";
+  if (request_string[request_string.size() - 1] == '/') {
+    request_string += "index.html";
   }
 
-  // Determine the file extension.
-  std::size_t last_slash_pos = request_file.find_last_of("/");
-  std::size_t last_dot_pos = request_file.find_last_of(".");
+  // Determine the file extension and file name
+  std::size_t last_slash_pos = request_string.find_last_of("/");
+  std::size_t last_dot_pos = request_string.find_last_of(".");
   std::string extension;
   if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos) {
-    extension = request_file.substr(last_dot_pos + 1);
+    extension = request_string.substr(last_dot_pos + 1);
+  }
+
+  std::string file_name = request_string.substr(last_slash_pos);
+
+  // Request path must be absolute and not contain "..".
+  if (file_name.empty() || file_name[0] != '/'
+      || file_name.find("..") != std::string::npos) {
+    return RequestHandler::BAD_REQUEST;
   }
 
   std::string file_name = request_file.substr(last_slash_pos);
@@ -73,7 +70,8 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   std::string full_path = root_ + file_name;
   std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
   if (!is) {
-    return RequestHandler::IOERROR;
+    response->SetStatus(Response::NOT_FOUND);
+    return RequestHandler::NOT_FOUND;
   }
 
   // Fill out the response to be sent to the client.
@@ -84,7 +82,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   	file_content.append(buf, is.gcount());
   }
   response->SetBody(file_content);
-  response->AddHeader("Content-Length", boost::lexical_cast<std::string>(response->ToString().size()));
+  response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
   response->AddHeader("Content-Type", mime_types::extension_to_type(extension));
   return RequestHandler::OK;
 }
@@ -118,6 +116,8 @@ bool StaticHandler::url_decode(const std::string& in, std::string& out) {
   }
   return true;
 }
+
+REGISTER_REQUEST_HANDLER(StaticHandler);
 
 } // namespace server
 } // namespace http

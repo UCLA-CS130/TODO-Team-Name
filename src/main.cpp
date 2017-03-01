@@ -16,6 +16,7 @@
 #include "server.hpp"
 #include "server_options.hpp"
 #include <sys/stat.h>
+#include "request_handler.hpp"
 
 namespace http {
   namespace server {
@@ -49,6 +50,11 @@ void getServerOptions(NginxConfig config, http::server::server_options *server_o
       else if (statement.at(2) == "StaticHandler") {
         server_options_pointer->static_handlers[statement.at(1)] = config_line->child_block_;
       }
+      // Status
+      else if (statement.at(2) == "StatusHandler") {
+        server_options_pointer->status_handler = statement.at(1);
+      }
+      server_options_pointer->all_handlers.push_back(std::make_pair(statement.at(2), statement.at(1)));
     }
 
     // Default
@@ -98,6 +104,7 @@ void printParsedConfig(http::server::server_options *server_options_pointer) {
   }
   
   std::cout << "Default Handler " << server_options_pointer->default_handler << "\n";
+  std::cout << "Status Handler " << server_options_pointer->status_handler << "\n";
   std::cout << "*******************************" << "\n";
 }
 

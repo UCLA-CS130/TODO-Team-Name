@@ -25,8 +25,10 @@ RequestHandler::Status NotFoundHandler::HandleRequest(const Request& request, Re
 	response->AddHeader("Content-Type", "text/html");
 	response->SetBody(NOT_FOUND_HTML);
 
-	return RequestHandler::OK;
+	return RequestHandler::NOT_FOUND;
 }
+
+REGISTER_REQUEST_HANDLER(NotFoundHandler);
 
 } // namespace server
 } // namespace http

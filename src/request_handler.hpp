@@ -7,9 +7,11 @@
 #define HTTP_REQUEST_HANDLER_HPP
 
 #include <string>
-#include "nginx-configparser/config_parser.h"
+#include <map>
+#include <memory>
 #include "request.hpp"
 #include "response.hpp"
+#include "../nginx-configparser/config_parser.h"
 
 namespace http {
 namespace server {
@@ -19,10 +21,11 @@ namespace server {
 class RequestHandler {
  public:
   enum Status {
-    OK = 0,
-    BAD_REQUEST = 1,
-    IOERROR = 2,
-    BAD_CONFIG = 3
+    OK = 200,
+    BAD_REQUEST = 400,
+    NOT_FOUND = 404,
+    INTERNAL_SERVER_ERROR = 500,
+    BAD_CONFIG = 1
   };
   
   // Initializes the handler. Returns a response code indicating success or
@@ -39,9 +42,30 @@ class RequestHandler {
   virtual Status HandleRequest(const Request& request,
                                Response* response) = 0;
 
+  static RequestHandler* CreateByName(const char* type);
+
 protected:
   std::string uri_prefix_;
 };
+
+
+extern std::map<std::string, RequestHandler* (*)(void)>* request_handler_builders;
+template<typename T>
+class RequestHandlerRegisterer {
+ public:
+  RequestHandlerRegisterer(const std::string& type) {
+    if (request_handler_builders == nullptr) {
+      request_handler_builders = new std::map<std::string, RequestHandler* (*)(void)>;
+    }
+    (*request_handler_builders)[type] = RequestHandlerRegisterer::Create;
+  }
+  static RequestHandler* Create() {
+    return new T;
+  }
+};
+#define REGISTER_REQUEST_HANDLER(ClassName) \
+  static RequestHandlerRegisterer<ClassName> ClassName##__registerer(#ClassName)
+
 
 } // namespace server
 } // namespace http
