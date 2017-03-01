@@ -110,7 +110,16 @@ void Server::run() {
   // have finished. While the server is running, there is always at least one
   // asynchronous operation outstanding: the asynchronous accept call waiting
   // for new incoming connections.
-  io_service_.run();
+  std::vector<boost::unique_ptr<boost::thread>> threadArray;
+
+  for (int i = 0; i < server_options.numThreads; i++){
+    boost::unique_ptr<boost::thread> temp(new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_)));
+  }
+  threadArray.push_back(temp);
+
+  for (int i = 0; i < numThreads; i++){
+    threads[i].join();
+  }
 }
 
 void Server::startAccept() {
