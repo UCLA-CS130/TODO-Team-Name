@@ -20,7 +20,7 @@ RequestHandler::Status ProxyHandler::Init(const std::string& uri_prefix, const N
 	std::vector<std::shared_ptr<NginxConfigStatement>> statements = config.statements_;
 
   // Get root directory from config.
-	if (statements.size() == 1) {
+  if (statements.size() == 1) {
     std::vector<std::string> statement_tokens = statements.at(0)->tokens_;
     if (statement_tokens.size() == 2 && statement_tokens.at(0) == "proxy_pass") {
       std::string full_url = statement_tokens.at(1);
