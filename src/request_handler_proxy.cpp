@@ -69,14 +69,17 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
   }
 
   if(resp->GetStatus() == Response::FOUND) {
-    //host_ = // GET NEW LOCATION HERE FROM 302 in Location:
-    Request redirect_request = TransformRequest(new_request);
+	  std::cout << "redirecting" << std::endl;
+	if(!resp->GetRedirectHostAndPath(host_, path_, protocol_)) {
+	  return RequestHandler::INTERNAL_SERVER_ERROR;
+	}
+    Request redirect_request = TransformRedirect(new_request);
     resp = RunOutsideRequest(redirect_request);
     if(resp == nullptr) {
       return RequestHandler::INTERNAL_SERVER_ERROR;
     }
   }
-
+`
   (*response) = (*resp);
 
   return RequestHandler::OK;
@@ -84,9 +87,20 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
 
 Request ProxyHandler::TransformRequest(const Request& request) const {
   Request transformed_request(request);
+  transformed_request.remove_header("Cookie");
   transformed_request.set_header("Host", host_);
   transformed_request.set_header("Connection", "close");
   transformed_request.set_uri(path_ + request.uri().substr(uri_prefix_.length()));
+  return transformed_request;
+}
+
+Request ProxyHandler::TransformRedirect(const Request& request) const {
+  Request transformed_request(request);
+  transformed_request.remove_header("Cookie");
+  transformed_request.set_header("Host", host_);
+  transformed_request.set_header("Connection", "close");
+  transformed_request.set_uri(path_);
+
   return transformed_request;
 }
 

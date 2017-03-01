@@ -22,6 +22,8 @@ public:
 
 private:
   Request TransformRequest(const Request& request) const;
+  Request TransformRedirect(const Request& request) const;
+
   Response* RunOutsideRequest(const Request& request) const;
 
   std::string host_;

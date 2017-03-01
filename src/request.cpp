@@ -61,7 +61,7 @@ std::string Request::body() const {
 
 std::string Request::ToString() const {
   std::string request_string;
-  
+
   // Prepare the first line
   request_string.append(method_);
   request_string.append(" ");
@@ -95,6 +95,19 @@ void Request::set_header(std::string first, std::string second) {
   }
   // Header not set, so make new
   headers_.push_back(std::make_pair(first, second));
+}
+
+void Request::remove_header(std::string key) {
+  unsigned int i = 0;
+  for(; i < headers_.size(); i++) {
+      if (headers_[i].first == key)
+        break;
+  }
+
+  if(i != headers_.size()) {
+    headers_.erase(headers_.begin()+i);
+  }
+  return;
 }
 
 void Request::set_uri(std::string uri) {

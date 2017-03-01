@@ -36,6 +36,7 @@ class Request {
 
   // Setters
   void set_header(std::string first, std::string second);
+  void remove_header(std::string key);
   void set_uri(std::string uri);
 
 private:

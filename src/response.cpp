@@ -18,6 +18,49 @@ Response::ResponseCode Response::GetStatus() {
   return status_;
 }
 
+bool Response::GetRedirectHostAndPath(std::string& host, std::string& path, std::string& protocol) {
+  std::string location = "";
+  unsigned int i = 0;
+  for (; i < headers_.size(); ++i) {
+    if (headers_[i].first == "Location") {
+      location = headers_[i].second;
+      break;
+    }
+  }
+  if (i == headers_.size()) {
+    std::cout << "Redirect location failed to be found" << std::endl;
+    return false;
+  }
+
+  // ignoring possibly https://, everything before '/' character is the host, everything after is the path
+  size_t double_slash_index = location.find("//");
+  size_t slash_index;
+
+  // search after first occurence of '//' if it exists
+  if(double_slash_index == std::string::npos) {
+    slash_index = location.find('/');
+    std::cout << "No protocol specified in Location field, default to http." << std::endl;
+    protocol = "http";
+  }
+  else {
+    protocol = location.substr(0, double_slash_index-1); //before the colon as well
+    slash_index = location.find('/', double_slash_index+2);
+  }
+
+  // '/' not found
+  if (slash_index == std::string::npos) {
+    std::cout << "could not find slash to separate host and path." << std::endl;
+    return false;
+  }
+
+  host = location.substr(double_slash_index+2, slash_index-double_slash_index-2);
+  path = location.substr(slash_index);
+
+  std::cout << "Redirecting, with: Protocol=" << protocol << ", Host=" << host << ", Path=" << path << std::endl;
+
+  return true;
+}
+
 void Response::SetStatus(const ResponseCode response_code) {
   status_ = response_code;
 }

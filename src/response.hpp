@@ -34,9 +34,8 @@ class Response {
   };
 
   static Response* Parse(const std::string& raw_res);
-  
   ResponseCode GetStatus();
-  
+  bool GetRedirectHostAndPath(std::string& host, std::string& path, std::string& protocol);
   void SetStatus(const ResponseCode response_code);
   void AddHeader(const std::string& header_name, const std::string& header_value);
   void SetBody(const std::string& body);
