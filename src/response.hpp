@@ -31,6 +31,8 @@ class Response {
     NOT_FOUND = 404,
     INTERNAL_SERVER_ERROR = 500
   };
+
+  static Response* Parse(const std::string& raw_res);
   
   void SetStatus(const ResponseCode response_code);
   void AddHeader(const std::string& header_name, const std::string& header_value);
@@ -39,6 +41,14 @@ class Response {
   std::string ToString();
 
 private:
+  // parse first line of the request
+  bool parse_first_line(const std::string& line);
+
+  // parse entire raw response and update private member variables
+  bool parse_raw_response(const std::string& raw_res);
+
+  ResponseCode IntToResponseCode(int code);
+
   ResponseCode status_;
   std::vector<std::pair<std::string, std::string>> headers_;
   std::string body_;

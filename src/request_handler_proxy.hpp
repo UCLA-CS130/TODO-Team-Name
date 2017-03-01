@@ -7,6 +7,8 @@
 #define HTTP_REQUEST_HANDLER_PROXY_HPP
 
 #include "request_handler.hpp"
+#include "request.hpp"
+#include "response.hpp"
 
 namespace http {
 namespace server {
@@ -17,6 +19,13 @@ public:
   Status Init(const std::string& uri_prefix, const NginxConfig& config) override;
 
   Status HandleRequest(const Request& request, Response* response) override;
+
+private:
+  Request TransformRequest(const Request& request) const;
+  Response* RunOutsideRequest(const Request& request, std::string host, std::string service) const;
+
+  std::string url_;
+  std::string path_;
 };
 
 } // namespace server

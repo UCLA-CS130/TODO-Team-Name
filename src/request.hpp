@@ -31,6 +31,13 @@ class Request {
   Headers headers() const;
 
   std::string body() const;
+
+  std::string ToString() const;
+
+  // Setters
+  void set_header(std::string first, std::string second);
+  void set_uri(std::string uri);
+
 private:
   std::string raw_request_;
   std::string method_;

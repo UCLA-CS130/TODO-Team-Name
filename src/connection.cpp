@@ -84,6 +84,8 @@ int Connection::longestSubstring(std::deque<std::string> req, std::deque<std::st
 }
 
 RequestHandler* Connection::chooseHandler() {
+  std::cout << request_->uri() << std::endl;
+
   // Create a response
   response_ = new Response();
 
@@ -137,6 +139,7 @@ void Connection::handleRead(const boost::system::error_code& e,
     // Write response to socket.
     std::vector<boost::asio::const_buffer> buffers;
     std::string response_string = response_->ToString();
+
     buffers.push_back(boost::asio::buffer(response_string));
     boost::asio::async_write(socket_, buffers,
           boost::bind(&Connection::handleWrite, shared_from_this(),

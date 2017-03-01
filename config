@@ -18,5 +18,9 @@ path /ucla ProxyHandler {
 	url www.ucla.edu;
 }
 
+path /example ProxyHandler {
+	url www.example.com;
+}
+
 # Default response handler if no handlers match.
 default NotFoundHandler {}

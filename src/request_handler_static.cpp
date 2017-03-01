@@ -113,6 +113,8 @@ bool StaticHandler::url_decode(const std::string& in, std::string& out) {
       out += in[i];
     }
   }
+  std::cout << in << std::endl;
+  std::cout << out << std::endl;
   return true;
 }
 
