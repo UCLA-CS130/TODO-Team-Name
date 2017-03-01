@@ -14,6 +14,10 @@
 namespace http {
 namespace server {
 
+ResponseCode Response::GetStatus() {
+  return status_;
+}
+
 void Response::SetStatus(const ResponseCode response_code) {
   status_ = response_code;
 }
@@ -34,6 +38,9 @@ std::string Response::ToString() {
   switch(status_) {
     case OK:
       response_string += "HTTP/1.1 200 OK" + carriage_return;
+      break;
+    case FOUND:
+      response_string += "HTTP/1.1 302 Found" + carriage_return;
       break;
     case BAD_REQUEST:
       response_string += "HTTP/1.1 400 Bad Request" + carriage_return;
@@ -71,20 +78,6 @@ Response* Response::Parse(const std::string& raw_res)
   }
 }
 
-/*
-void Response::AddRelativePaths(const std::string& uri_prefix) {
-  boost::regex re_js("(<script src=\")(/.*?)(\">)");
-  std::string fmt_js("?2$1" + uri_prefix + "$2$3");
-  body_ = boost::regex_replace(body_, re_js, fmt_js, boost::match_default | boost::format_all);
-  
-  boost::regex re_css("(<link rel=.*? href=\")(/.*?)(\">)");
-  std::string fmt_css("?2$1" + uri_prefix + "$2$3");
-  body_ = boost::regex_replace(body_, re_css, fmt_css, boost::match_default | boost::format_all);
-
-  //std::string result = boost::regex_replace(body_, re, newtext);
-}
-*/
-
 //parse the first line of the response
 bool Response::parse_first_line(const std::string& line) {
   std::vector<std::string> tokens;
@@ -110,6 +103,8 @@ Response::ResponseCode Response::IntToResponseCode(int code) {
   switch(code) {
     case 200:
       return ResponseCode::OK;
+    case 302:
+      return ResponseCode::FOUND;
     case 400:
       return ResponseCode::BAD_REQUEST;
     case 404:

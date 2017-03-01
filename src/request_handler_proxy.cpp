@@ -17,16 +17,43 @@ namespace server {
 RequestHandler::Status ProxyHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
 	uri_prefix_ = uri_prefix;
 
-  // Set path uri of the end node
-  path_ = "/";
-
 	std::vector<std::shared_ptr<NginxConfigStatement>> statements = config.statements_;
 
   // Get root directory from config.
 	if (statements.size() == 1) {
     std::vector<std::string> statement_tokens = statements.at(0)->tokens_;
     if (statement_tokens.size() == 2 && statement_tokens.at(0) == "url") {
-      url_ = statement_tokens.at(1);
+      std::string full_url = statement_tokens.at(1);
+
+      std::string::size_type protocol_pos = full_url.find("//");
+      if(protocol_pos == std::string::npos) {
+        std::cout << "ProxyHandler " << uri_prefix << " didn't specify protocol. Using default http" << std::endl;
+        protocol_ = "http";
+
+        std::string::size_type host_pos = full_url.find('/');
+        if(host_pos != std::string::npos) {
+          host_ = full_url.substr(0, host_pos);
+          path_ = full_url.substr(host_pos);
+        }
+        else {
+          host_ = full_url;
+          path_ = "/";
+        }
+      }
+      else {
+        protocol_ = full_url.substr(0, protocol_pos - 1);
+
+        std::string::size_type host_pos = full_url.find('/', protocol_pos + 2);
+        if(host_pos != std::string::npos) {
+          host_ = full_url.substr(protocol_pos + 2, host_pos - protocol_pos - 2);
+          path_ = full_url.substr(host_pos);
+        }
+        else {
+          host_ = full_url.substr(protocol_pos + 2);
+          path_ = "/";
+        }
+      }
+
       return RequestHandler::OK;
     }
   }
@@ -36,14 +63,19 @@ RequestHandler::Status ProxyHandler::Init(const std::string& uri_prefix, const N
 
 RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Response* response) {
   Request new_request = TransformRequest(request);
-  Response* resp = RunOutsideRequest(new_request, url_, "http");
+  Response* resp = RunOutsideRequest(new_request);
   if(resp == nullptr) {
     return RequestHandler::INTERNAL_SERVER_ERROR;
   }
 
-  // add corresponding uri_prefix_ to all html paths
-  // Not implemented due to errors
-  // resp->AddRelativePaths(uri_prefix_);
+  if(resp.GetStatus() == ResponseCode::FOUND) {
+    //host_ = // GET NEW LOCATION HERE FROM 302 in Location:
+    Request redirect_request = TransformRequest(new_request);
+    resp = RunOutsideRequest(redirect_request);
+    if(resp == nullptr) {
+      return RequestHandler::INTERNAL_SERVER_ERROR;
+    }
+  }
 
   (*response) = (*resp);
 
@@ -52,16 +84,15 @@ RequestHandler::Status ProxyHandler::HandleRequest(const Request& request, Respo
 
 Request ProxyHandler::TransformRequest(const Request& request) const {
   Request transformed_request(request);
-  transformed_request.set_header("Host", url_);
+  transformed_request.set_header("Host", host_);
   transformed_request.set_header("Connection", "close");
-  transformed_request.set_header("Accept-Encoding", "identity");
   transformed_request.set_uri(path_ + request.uri().substr(uri_prefix_.length()));
   return transformed_request;
 }
 
-Response* ProxyHandler::RunOutsideRequest(const Request& request, std::string url, std::string service) const {
+Response* ProxyHandler::RunOutsideRequest(const Request& request) const {
   HttpClient c;
-  c.EstablishConnection(url, service);
+  c.EstablishConnection(host_, protocol_);
   auto resp = c.SendRequest(request);
   return resp;
 }

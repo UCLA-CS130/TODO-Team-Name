@@ -27,12 +27,15 @@ class Response {
  public:
   enum ResponseCode {
     OK = 200,
+    FOUND = 302,
     BAD_REQUEST = 400,
     NOT_FOUND = 404,
     INTERNAL_SERVER_ERROR = 500
   };
 
   static Response* Parse(const std::string& raw_res);
+  
+  ResponseCode GetStatus();
   
   void SetStatus(const ResponseCode response_code);
   void AddHeader(const std::string& header_name, const std::string& header_value);

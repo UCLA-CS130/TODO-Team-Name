@@ -22,10 +22,11 @@ public:
 
 private:
   Request TransformRequest(const Request& request) const;
-  Response* RunOutsideRequest(const Request& request, std::string host, std::string service) const;
+  Response* RunOutsideRequest(const Request& request) const;
 
-  std::string url_;
+  std::string host_;
   std::string path_;
+  std::string protocol_;
 };
 
 } // namespace server
