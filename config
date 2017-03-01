@@ -2,6 +2,8 @@
 
 port 8080;   # This is also a comment.
 
+threads 4;
+
 path /static1 StaticHandler {
 	root www;
 }

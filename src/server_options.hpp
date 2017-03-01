@@ -32,6 +32,9 @@ struct server_options {
 
   // Default response handler
   std::string default_handler;
+
+  // Threads
+  int numThreads;
 };
 
 } // namespace server
