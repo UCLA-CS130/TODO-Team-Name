@@ -23,8 +23,9 @@ REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp
 RESPONSE_DEPENDENCIES=src/response.cpp
 REQUEST_DEPENDENCIES=src/request.cpp src/request_parser.cpp
 CONNECTION_DEPENDENCIES=src/connection.cpp src/connection_manager.cpp src/request_handler.hpp
+HTTP_CLIENT_DEPENDENCIES=src/http_client.cpp src/request.cpp src/response.cpp src/request_parser.cpp
 
-all: webserver 
+all: webserver
 
 webserver: $(SRC_FILES)
 	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
@@ -58,13 +59,17 @@ test:
 	$(TEST_DIR)/request_test.cpp $(REQUEST_DEPENDENCIES) \
 	$(TEST_DIR)/libgtest.a -o request_test $(BOOST_FLAGS)
 
-	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
-	# $(TEST_DIR)/connection_test.cpp $(CONNECTION_DEPENDENCIES) \
-	# $(TEST_DIR)/libgtest.a -o connection_test $(BOOST_FLAGS)
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/http_client_test.cpp $(HTTP_CLIENT_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o http_client_test $(BOOST_FLAGS)
 
-	# g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
-	# $(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
-	# $(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
+	$(TEST_DIR)/connection_test.cpp $(CONNECTION_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o connection_test $(BOOST_FLAGS)
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
+	$(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
 
 coverage: CXXFLAGS+=-coverage
 coverage:

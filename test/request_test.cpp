@@ -68,3 +68,18 @@ TEST_F(RequestTest, IncompleteRequest){
 	EXPECT_EQ(request->uri(), "");
 	EXPECT_EQ(request->headers().size(), 0);
 }
+
+TEST_F(RequestTest, ManipulateRequest){
+	const std::string raw_request = "GET /file HTTP/1.0\r\nContent-Type: text/plain\r\n\r\n";
+	Parse(raw_request);
+	ASSERT_TRUE(request.get());
+	request->set_header("Cookie", "yum");
+
+	//adding Cookie to headers
+	EXPECT_EQ(request->ToString(), "GET /file HTTP/1.0\r\nContent-Type: text/plain\r\nCookie: yum\r\n\r\n");
+
+	//remove header
+	request->remove_header("Cookie");
+	EXPECT_EQ(request->ToString(), raw_request);
+
+}

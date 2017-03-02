@@ -39,3 +39,29 @@ TEST(ResponseTest, InternalServerErrorResponse){
 	std::string expected_response = "HTTP/1.1 500 Internal Server Error\r\n\r\n";
 	EXPECT_EQ(response.ToString(), expected_response);
 }
+
+//Test parsing and new function GetRedirectHostAndPath
+TEST(ResponseTest, ValidParsing){
+	http::server::Response* response = http::server::Response::Parse("HTTP/1.1 200 OK\r\nDate: Mon, 27 Jul 2009 12:28:53 GMT\r\n\r\n");
+	ASSERT_TRUE(response);
+	response->AddHeader("Location", "http://www.ucla.edu/path");
+	std::string protocol;
+	std::string host;
+	std::string path;
+	response->GetRedirectHostAndPath(host, path, protocol);
+	EXPECT_EQ(protocol, "http");
+	EXPECT_EQ(host, "www.ucla.edu");
+	EXPECT_EQ(path, "/path");
+	delete response;
+}
+
+//test invalid responses caught
+TEST(ResponseTest, InvalidParse){
+	//no response code
+	http::server::Response* response = http::server::Response::Parse("HTTP/1.1 OK\r\nDate: Mon, 27 Jul 2009 12:28:53 GMT\r\n\r\n");
+	ASSERT_FALSE(response);
+	delete response;
+	//missing semicolon
+	response = http::server::Response::Parse("HTTP/1.1 200 OK\r\nDate Mon, 27 Jul 2009 12:28:53 GMT\r\n\r\n");
+	ASSERT_FALSE(response);
+}
