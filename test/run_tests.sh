@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running Integration Test..."
-./integration_test.sh
+./test/integration_test.sh
 
 echo "Running Unit Tests..."
 echo "Building Unit Tests..."

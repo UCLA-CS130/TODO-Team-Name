@@ -5,7 +5,6 @@
 #include "request_handler_static.hpp"
 #include "response.hpp"
 #include "request.hpp"
-#include "server_options.hpp"
 
 class StaticHandlerTest : public ::testing::Test {
 protected:
