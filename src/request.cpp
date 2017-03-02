@@ -59,5 +59,60 @@ std::string Request::body() const {
   return body_;
 }
 
+std::string Request::ToString() const {
+  std::string request_string;
+
+  // Prepare the first line
+  request_string.append(method_);
+  request_string.append(" ");
+  request_string.append(uri_);
+  request_string.append(" ");
+  request_string.append(version_);
+  request_string.append("\r\n");
+
+  // Attach the headers
+  for(auto const& header : headers_) {
+    request_string.append(header.first);
+    request_string.append(": " );
+    request_string.append(header.second);
+    request_string.append("\r\n");
+  }
+
+  // Beginning of Body
+  request_string.append("\r\n");
+  request_string.append(body_);
+
+  return request_string;
+}
+
+void Request::set_header(std::string first, std::string second) {
+  for(auto& header : headers_) {
+    if(header.first == first) {
+      // Found existing header, so set and return
+      header.second = second;
+      return;
+    }
+  }
+  // Header not set, so make new
+  headers_.push_back(std::make_pair(first, second));
+}
+
+void Request::remove_header(std::string key) {
+  unsigned int i = 0;
+  for(; i < headers_.size(); i++) {
+      if (headers_[i].first == key)
+        break;
+  }
+
+  if(i != headers_.size()) {
+    headers_.erase(headers_.begin()+i);
+  }
+  return;
+}
+
+void Request::set_uri(std::string uri) {
+  uri_ = uri;
+}
+
 } // namespace server
 } // namespace http
