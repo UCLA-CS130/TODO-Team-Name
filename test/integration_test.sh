@@ -9,18 +9,14 @@ echo "port 8080;
 path /echo EchoHandler {}
 path /static1 StaticHandler { root www; }
 path /static2 StaticHandler { root pics; }
-path /test ProxyHandler {
-	proxy_pass localhost:8081/example;
-}
+path /test ProxyHandler { proxy_pass localhost:8081/example; }
 " > test_config
 
 echo "port 8081;
 path /echo EchoHandler {}
 path /static1 StaticHandler { root www; }
 path /static2 StaticHandler { root pics; }
-path /example ProxyHandler {
-	proxy_pass www.example.com;
-}
+path /example ProxyHandler { proxy_pass www.example.com; }
 
 " > test_config2
 
