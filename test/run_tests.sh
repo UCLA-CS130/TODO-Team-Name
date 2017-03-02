@@ -24,6 +24,10 @@ echo "Connection Manager Test"
 ./connection_manager_test
 echo "Request Parser Test"
 ./request_parser_test
+echo "Request Http Client Test"
+./http_client_test
+echo "Proxy Handler Test"
+./request_handler_proxy_test
 
 echo "All tests complete. Cleaning up..."
 make clean
