@@ -26,6 +26,7 @@
 #include "request_handler_static.hpp"
 #include "request_handler_status.hpp"
 #include "request_handler_notfound.hpp"
+#include <sstream>
 
 namespace http {
 namespace server {
@@ -55,6 +56,9 @@ public:
   void stop();
 
 private:
+  /// Handle a partial reqad request.
+  void handleReadPartial(const boost::system::error_code& e,
+      std::size_t bytes_transferred);
   /// Handle completion of a read operation.
   void handleRead(const boost::system::error_code& e,
       std::size_t bytes_transferred);
@@ -91,7 +95,7 @@ private:
 
   /// Buffer for incoming data.
   enum { BUF_SIZE = 8192 };
-  char buffer_[BUF_SIZE];
+  boost::asio::streambuf buffer_;
 
   /// The incoming request.
   std::unique_ptr<Request> request_;

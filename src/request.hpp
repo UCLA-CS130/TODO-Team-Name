@@ -26,6 +26,16 @@ class Request {
   std::string method() const;
   std::string uri() const;
   std::string version() const;
+  std::string GetContentLength() const {
+    for (auto const& header : headers_) {
+      if (header.first == "Content-Length") return header.second;
+    } 
+    return "";
+}
+  void appendBody(const std::string remainingReq) {
+    body_.append(remainingReq);
+    raw_request_.append(remainingReq);
+  }
 
   using Headers = std::vector<std::pair<std::string, std::string>>;
   Headers headers() const;

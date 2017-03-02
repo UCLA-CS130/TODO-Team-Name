@@ -157,12 +157,12 @@ void Server::run() {
   // for new incoming connections.
   std::vector<boost::shared_ptr<boost::thread>> threadArray;
 
-  for (int i = 0; i < server_options_->numThreads; i++){
+  for (int i = 0; i < numThreads_; i++){
     boost::shared_ptr<boost::thread> temp(new boost::thread(boost::bind(&boost::asio::io_service::run, &io_service_)));
     threadArray.push_back(temp);
   }
 
-  for (int i = 0; i < server_options_->numThreads; i++){
+  for (int i = 0; i < numThreads_; i++){
     threadArray[i]->join();
   }
 }
