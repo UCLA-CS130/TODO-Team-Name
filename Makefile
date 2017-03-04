@@ -9,7 +9,7 @@ GTEST_IMPORT=-I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc
 GMOCK_IMPORT=-I$(GMOCK_PATH)/include
 TEST_DIR=test
 TEST_FILES=$(TEST_DIR)/*.cpp
-BOOST_FLAGS=-lpthread -lboost_system -lboost_regex
+BOOST_FLAGS=-lpthread -lboost_system -lboost_regex -lboost_thread
 RESULTS_TEST_DIR=results-unit-tests
 RESULTS_COVERAGE_DIR=results-coverage
 

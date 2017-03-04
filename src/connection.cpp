@@ -21,6 +21,8 @@
 #include "request.hpp"
 #include "response.hpp"
 #include "request_handler_status.hpp"
+#include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace http {
 namespace server {
@@ -36,22 +38,19 @@ Connection::Connection(boost::asio::io_service& io_service,
     default_handler_(default_handler),
     status_handler_(status_handler)
 {
-  clearBuffer();
-}
-
-void Connection::clearBuffer() {
-  memset( buffer_, '\0', sizeof(char)*BUF_SIZE );
 }
 
 boost::asio::ip::tcp::socket& Connection::socket() {
   return socket_;
 }
 
+
+
 void Connection::start() {
-  socket_.async_read_some(boost::asio::buffer(buffer_, BUF_SIZE),
-      boost::bind(&Connection::handleRead, shared_from_this(),
-        boost::asio::placeholders::error,
-        boost::asio::placeholders::bytes_transferred));
+  boost::asio::async_read_until(socket_, buffer_, "\r\n\r\n",
+                                boost::bind(&Connection::handleReadPartial, shared_from_this(),
+                                            boost::asio::placeholders::error,
+                                            boost::asio::placeholders::bytes_transferred));
 }
 
 void Connection::stop() {
@@ -123,17 +122,76 @@ RequestHandler* Connection::chooseHandler() {
   return best_handler;
 }
 
+void Connection::handleReadPartial(const boost::system::error_code& e,
+    std::size_t bytes_transferred) {
+
+  if (!e) {
+    // Get the request.
+    std::ostringstream oss;
+    oss << &buffer_;
+    std::string raw_req = oss.str();
+
+    request_ = Request::Parse(raw_req);
+    RequestHandler::Status handler_status;
+
+    // Pick a handler and handle the request.
+    if (request_){
+      std::size_t contentLength;
+      std::string contentLStr = request_.get()->GetContentLength();
+      if (contentLStr.empty()){
+        contentLength = 0;
+      }
+      else{
+        contentLength = boost::lexical_cast<std::size_t>(contentLStr);
+      }
+
+      if (request_.get()->body().length() < contentLength){
+        boost::asio::async_read(socket_, buffer_, boost::asio::transfer_exactly(contentLength - request_.get()->body().length()),
+                            boost::bind(&Connection::handleRead, shared_from_this(),
+                                        boost::asio::placeholders::error,
+                                        boost::asio::placeholders::bytes_transferred));
+      }
+    }
+    
+        handler_status = chooseHandler()->HandleRequest(*request_, response_);
+        // If request handling failed, invoke NotFound handler
+        // (In the future, we could invoke different handlers based on the type of
+        // error that occured, but for now just send everything bad to 404!) 
+        if (handler_status != RequestHandler::OK) {
+          std::cerr << "Error: handler returned status code " << handler_status << ".\n";
+          std::cerr << "Invoking default handler.\n";
+          default_handler_->HandleRequest(*request_, response_);
+          }
+
+    // Let status handler know the result.
+    dynamic_cast<StatusHandler*>(status_handler_)->update(request_->uri(), handler_status);
+
+    // Write response to socket.
+    response_string = response_->ToString();
+    buffers_.push_back(boost::asio::buffer(response_string));
+    boost::asio::async_write(socket_, buffers_,
+          boost::bind(&Connection::handleWrite, shared_from_this(),
+            boost::asio::placeholders::error));
+  }
+
+  else if (e != boost::asio::error::operation_aborted) {
+    connection_manager_.stop(shared_from_this());
+  }
+
+}
+
 void Connection::handleRead(const boost::system::error_code& e,
     std::size_t bytes_transferred) {
 
   if (!e) {
     // Get the request.
-    std::string raw_req(buffer_);
-    request_ = Request::Parse(raw_req);
+    std::ostringstream oss;
+    oss << &buffer_;
+    std::string remainingReq = oss.str();
 
-    // Pick a handler and handle the request.
-    auto handler_status = chooseHandler()->HandleRequest(*request_, response_);
-
+    request_.get()->appendBody(remainingReq);
+    RequestHandler::Status handler_status = chooseHandler()->HandleRequest(*request_, response_);
+    
     // If request handling failed, invoke NotFound handler
     // (In the future, we could invoke different handlers based on the type of
     // error that occured, but for now just send everything bad to 404!) 
@@ -153,13 +211,10 @@ void Connection::handleRead(const boost::system::error_code& e,
           boost::bind(&Connection::handleWrite, shared_from_this(),
             boost::asio::placeholders::error));
   }
-
   else if (e != boost::asio::error::operation_aborted) {
     connection_manager_.stop(shared_from_this());
   }
 
-  // Make sure buffer is clear before another read.
-  clearBuffer();
 }
 
 void Connection::handleWrite(const boost::system::error_code& e) {

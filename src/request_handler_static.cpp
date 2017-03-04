@@ -17,11 +17,11 @@ namespace http {
 namespace server {
 
 RequestHandler::Status StaticHandler::Init(const std::string& uri_prefix, const NginxConfig& config) {
-	uri_prefix_ = uri_prefix;
-	std::vector<std::shared_ptr<NginxConfigStatement>> statements = config.statements_;
+  uri_prefix_ = uri_prefix;
+  std::vector<std::shared_ptr<NginxConfigStatement>> statements = config.statements_;
 
   // Get root directory from config.
-	if (statements.size() == 1) {
+  if (statements.size() == 1) {
     std::vector<std::string> statement_tokens = statements.at(0)->tokens_;
     if (statement_tokens.size() == 2 && statement_tokens.at(0) == "root") {
       root_ = statement_tokens.at(1);
@@ -78,7 +78,7 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   char buf[512];
   std::string file_content = "";
   while (is.read(buf, sizeof(buf)).gcount() > 0) {
-  	file_content.append(buf, is.gcount());
+    file_content.append(buf, is.gcount());
   }
   response->SetBody(file_content);
   response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
