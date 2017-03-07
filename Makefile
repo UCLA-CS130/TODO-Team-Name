@@ -31,7 +31,7 @@ all: webserver
 webserver: $(SRC_FILES)
 	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
 
-build:
+docker:
 	rm -f deploy/webserver
 	docker build -t httpserver.build .
 	docker run httpserver.build > deploy/binary.tar
@@ -39,6 +39,9 @@ build:
 	rm -f deploy/binary.tar
 	docker build -t httpserver deploy
 	docker run --rm -t -p 8080:8080 httpserver
+
+aws:
+	./aws_deploy.sh
 
 test:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \

@@ -5,16 +5,29 @@
 Matt Dragotto, Andy Kuang, McKenna Galvin
 
 
-A full HTTP web server, from the [boost documentation](http://www.boost.org/doc/libs/1_53_0/doc/html/boost_asio/examples.html). This code is an adapted version of the [HTTP server](http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/examples/cpp11_examples.html) example.
+A full HTTP web server, from the
+[boost documentation](http://www.boost.org/doc/libs/1_53_0/doc/html/boost_asio/examples.html).
+This code is an adapted version of the
+[HTTP server](http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/examples/cpp11_examples.html)
+example.
+
+The server is currently deployed on AWS under the public IP *54.190.63.110*.
+Try out some of the following links!
+* Echo: [http://54.190.63.110:8080/echo](http://54.190.63.110:8080/echo)
+* Static HTML: [http://54.190.63.110:8080/static1/index.html](http://54.190.63.110:8080/static1/index.html)
+* Static image: [http://54.190.63.110:8080/static2/ducks.jpg](http://54.190.63.110:8080/static2/ducks.jpg)
+* Status: [http://54.190.63.110:8080/status](http://54.190.63.110:8080/status)
+* Proxy: [http://54.190.63.110:8080/](http://54.190.63.110:8080/)
 
 ---
 
-### To Build
-Run `make build`
+### Deploying
+* To build and run the webserver in docker, run `make docker`
+* To deploy the docker image to AWS and run it, run `make aws`
 
 ---
 
-### Usage
+### Usage - local development
 * Edit `config` to define the port on which you want the server to run.
 * Run `make` to build the source code
 * Run server using `./webserver config`
@@ -56,15 +69,3 @@ Then find the PID of the process associated with the server and kill it using `s
 We also use the following helper classes taken from the boost example:
 * `mime_types`
 * `request_parser`
-
-
----
-
-### Deploying on AWS
-(Mainly just notes for me so I can remember how to do it again. I had saved the EC2 public key as webserver.pem in the root directory of the repo.)
-* Save docker image as tar file: `docker save -o httpserver.tar httpserver`
-* Copy the docker image to AWS: `sudo scp -i webserver.pem httpserver.tar ec2-user@54.190.63.110:/home/ec2-user`
-* SSH into AWS: `ssh -i webserver.pem ec2-user@54.190.63.110`
-* Load the image into docker: `docker load -i httpserver.tar`
-* Run the server: `docker run --rm -t -p 8080:8080 httpserver`
-* If the port is already allocated, run `docker ps` and `docker kill <container id>`
