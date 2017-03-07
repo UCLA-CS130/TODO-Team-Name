@@ -24,6 +24,7 @@ Try out some of the following links!
 ### Deploying
 * To build and run the webserver in docker, run `make docker`
 * To deploy the docker image to AWS and run it, run `make aws`
+* To SSH into the EC2 instance, run `ssh -i webserver.pem ec2-user@54.190.63.110`
 
 ---
 
