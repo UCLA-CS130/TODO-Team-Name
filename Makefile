@@ -9,7 +9,7 @@ GTEST_IMPORT=-I$(GTEST_PATH)/include -I./src $(GTEST_PATH)/src/gtest_main.cc
 GMOCK_IMPORT=-I$(GMOCK_PATH)/include
 TEST_DIR=test
 TEST_FILES=$(TEST_DIR)/*.cpp
-BOOST_FLAGS=-lpthread -lboost_system -lboost_regex -lboost_thread
+BOOST_FLAGS=-static-libgcc -static-libstdc++ -lpthread -Wl,-Bstatic -lboost_system -lboost_regex -lboost_thread
 RESULTS_TEST_DIR=results-unit-tests
 RESULTS_COVERAGE_DIR=results-coverage
 
@@ -30,6 +30,18 @@ all: webserver
 
 webserver: $(SRC_FILES)
 	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
+
+docker:
+	rm -f deploy/webserver
+	docker build -t httpserver.build .
+	docker run httpserver.build > deploy/binary.tar
+	cd deploy && tar -xvf binary.tar
+	rm -f deploy/binary.tar
+	docker build -t httpserver deploy
+	docker run --rm -t -p 8080:8080 httpserver
+
+aws:
+	./aws_deploy.sh
 
 test:
 	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
