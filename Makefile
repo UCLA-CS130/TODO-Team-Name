@@ -1,6 +1,6 @@
 # Building the server
 CXXFLAGS=-std=c++11 -Wall -Werror
-SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
+SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 
 # Running unit tests
 GTEST_PATH=nginx-configparser/googletest/googletest
