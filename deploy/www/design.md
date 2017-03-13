@@ -31,5 +31,42 @@ webserver to HTML!
 ---
 
 ## Feature #2: MySQL interface
-Include: feature description, high-level details of implementation,
-URL for demoing that feature, and an exact walkthrough that instructors can follow along
+
+Our second feature is a simple web interface to a MySQL server.
+
+[The SQL interface is available here](http://54.190.63.110:8080/sql)
+
+The page has two text inputs that can be used to query and update the database. We ran a
+MySQL server in a container on our AWS instance, then use a c++ SQL client to connect to
+the database and issue queries.
+
+The SQL interface page list a few commands that you can execute to walk you through
+some of the main features of the SQL interface. They are reproduced below:
+
+* First, execute the following statement into the **Query** input to see a list of available tables:
+  `SHOW Tables;`
+* Let's take a closer look at TestTable! Enter the following into the **Query** input:
+  `SELECT * FROM TestTable;`
+* Now try adding an entry to the table. Enter the following into the **Update** input:
+  `INSERT INTO TestTable VALUES ("5", "Shaghayegh");`
+* Query the database to see the updated table using the **Query** input:
+  `SELECT * FROM TestTable;`
+* Let's say we want to change an entry. You can execute something like the following in the **Update** input:
+  `UPDATE TestTable SET name="Valeed" WHERE id=5;`
+* View your changes using the **Query** input:
+  `SELECT * FROM TestTable;`
+* Now let's delete that last entry using **Update**:
+  `DELETE FROM TestTable WHERE id=5;`
+
+
+### Future changes / modifications
+Due to time constraints, this database interface is just a preliminary version.
+The following features could be added to make it more user-friendly in the future:
+
+* Asynchronously update the page when a query is receieved, instead of having to refresh the entire page
+* Combine the query and update inputs into a single input so it's less confusing to the user
+* Display the new contents of the table when it's updated, instead of just an 'Update Success' message
+
+
+
+
