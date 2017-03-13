@@ -79,31 +79,31 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
         res_string = sql_engine.HandleRequest(q_field, 2);
     }
 
-    // Open the file to send back.
-    std::string full_path = "deploy/" + root_ + "/sqlpage.html";
-    std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
-    if (!is) {
-        response->SetStatus(Response::NOT_FOUND);
-        return RequestHandler::NOT_FOUND;
-    }
+	// Open the file to send back.
+	  std::string full_path = root_ + "/sqlpage.html";
+	  std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
+	  if (!is) {
+	    response->SetStatus(Response::NOT_FOUND);
+	    return RequestHandler::NOT_FOUND;
+	  }
 
-    // Fill out the response to be sent to the client.
-    response->SetStatus(Response::OK);
-    char buf[8192];
-    std::string file_content = "";
-    while (is.read(buf, sizeof(buf)).gcount() > 0) {
-        file_content.append(buf, is.gcount());
-    }
-    if (res_string.length() != 0){
-        file_content.append("<h2>Results:</h2>");
-    }
-    file_content.append(res_string.c_str(), res_string.length());
-    std::string ender = "</div></body></html>";
-    file_content.append(ender.c_str(), ender.length());
-    response->SetBody(file_content);
-    response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
-    response->AddHeader("Content-Type", mime_types::extension_to_type("html"));
-    return RequestHandler::OK;
+	  // Fill out the response to be sent to the client.
+	  response->SetStatus(Response::OK);
+	  char buf[8192];
+	  std::string file_content = "";
+	  while (is.read(buf, sizeof(buf)).gcount() > 0) {
+	    file_content.append(buf, is.gcount());
+	  }
+	  if (resString.length() != 0){
+	  	file_content.append("<h2>Results:</h2>");
+	  }
+	  file_content.append(resString.c_str(), resString.length());
+	  std::string ender = "</div></body></html>";
+	  file_content.append(ender.c_str(), ender.length());
+	  response->SetBody(file_content);
+	  response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
+	  response->AddHeader("Content-Type", mime_types::extension_to_type("html"));
+	  return RequestHandler::OK;
 }
 
 bool SqlHandler::url_decode(const std::string& in, std::string& out) {
