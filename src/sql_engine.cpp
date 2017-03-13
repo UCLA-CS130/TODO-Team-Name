@@ -43,14 +43,14 @@ std::string SqlEngine::HandleRequest(std::string& field, int mode)
           outString += res->getString(i) + ", ";
         }
       }
+      delete res;
     }
     //if its an update, we dont need to return any results
     else if (mode == 2){  //update mode
-      res = stmt->executeQuery(field);
-      outString = "Update Attempted.";
+      stmt->execute(field);
+      outString = "Update Success!";
     }
 
-    delete res;
     delete stmt;
     delete con;
 
