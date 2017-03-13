@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>SQL Page</title>
+    <meta charset="utf-8">
+    <!-- Bootstrap -->
+
+    <!-- Script -->
+
+  </head>
+
+  <body>
+
+
+  <div class="col-lg-8">
+    <h2>Database Interface</h2>
+    <h1>Query</h1>
+    <p> <b>Ex.</b> SELECT name FROM Team </p> 
+    <form class="form-inline" role="form" action="/sql/query" method="GET"
+    <form action="/sql/query" method="GET">
+      <div class="form-group">
+        <label class="sr-only" for="q">Query</label>
+        <input class="form-control" type="text" id="q" name="q" placeholder="Search" autocomplete="off">
+      </div> 
+      <input class="btn btn-default" type="submit" value="Search">
+    </form>
+    <h1>Update/Insert/Delete</h1>
+    <p> <b>Ex.</b> INSERT INTO Team (name) VALUES ("YourName") </p> 
+    <form class="form-inline" role="form" action="/sql/update" method="GET"
+    <form action="/sql/update" method="GET">
+      <div class="form-group">
+        <label class="sr-only" for="q">Update</label>
+        <input class="form-control" type="text" id="q" name="q" placeholder="Search" autocomplete="off">
+      </div> 
+      <input class="btn btn-default" type="submit" value="Search">
+    </form>
+  </div>
+

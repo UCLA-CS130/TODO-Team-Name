@@ -1,62 +1,62 @@
 #include <iostream>
 #include "sql_engine.hpp"
-#include <mysql.h>
-#include <stdio.h>
+
 #include <stdlib.h>
+#include <string>
+#include "mysql_connection.h"
+
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <resultset_metadata.h>
 
  
- 
-MYSQL* SqlEngine::mysql_connection_setup(struct connection_details mysql_details)
+std::string SqlEngine::HandleRequest(std::string& field, int mode)
 {
-     // first of all create a mysql instance and initialize the variables within
-    MYSQL *connection = mysql_init(NULL);
- 
-    // connect to the database with the details attached.
-    if (!mysql_real_connect(connection,mysql_details.server, mysql_details.user, mysql_details.password, mysql_details.database, 0, NULL, 0)) {
-      printf("Conection error : %s\n", mysql_error(connection));
-      exit(1);
+  std::string outString = "";
+  try {
+    sql::Driver *driver;
+    sql::Connection *con;
+    sql::Statement *stmt;
+    sql::ResultSet *res;
+
+    /* Create a connection */
+    driver = get_driver_instance();
+    con = driver->connect("54.190.63.110:6603", "root", "");
+    /* Connect to the MySQL test database */
+    con->setSchema("DB");
+
+    //If its a query, we want to return some results
+    std::cout << "QueryStatement: " << field << "\n"; 
+    stmt = con->createStatement();
+    if (mode == 1){   //query mode
+      res = stmt->executeQuery(field);
+      //get result set metadata
+      sql::ResultSetMetaData *res_meta = res -> getMetaData();
+      int columns = res_meta -> getColumnCount();
+
+      //Loop for each row
+      while (res->next()) {
+        /* Access column data by index, 1-indexed*/
+        for (int i = 1; i <= columns; i++) {
+          outString += res->getString(i) + ", ";
+        }
+      }
     }
-    return connection;
-}
- 
-MYSQL_RES* SqlEngine::mysql_perform_query(MYSQL *connection, char *sql_query)
-{
-   // send the query to the database
-   if (mysql_query(connection, sql_query))
-   {
-      printf("MySQL query error : %s\n", mysql_error(connection));
-      exit(1);
-   }
- 
-   return mysql_use_result(connection);
-}
- 
-bool SqlEngine::HandleRequest()
-{
-  MYSQL *conn;		// the connection
-  MYSQL_RES *res;	// the results
-  MYSQL_ROW row;	// the results row (line by line)
- 
-  struct connection_details mysqlD;
-  mysqlD.server = "localhost";  // where the mysql database is
-  mysqlD.user = "root";		// the root user of mysql	
-  mysqlD.password = "osboxes"; // the password of the root user in mysql
-  mysqlD.database = "DB";	// the databse to pick
- 
-  // connect to the mysql database
-  conn = mysql_connection_setup(mysqlD);
- 
-  // assign the results return to the MYSQL_RES pointer
-  res = mysql_perform_query(conn, "show tables");
- 
-  printf("MySQL Tables in mysql database:\n");
-  while ((row = mysql_fetch_row(res)) !=NULL)
-      printf("%s\n", row[0]);
- 
-  /* clean up the database result set */
-  mysql_free_result(res);
-  /* clean up the database link */
-  mysql_close(conn);
- 
-  return 0;
+    //if its an update, we dont need to return any results
+    else if (mode == 2){  //update mode
+      res = stmt->executeQuery(field);
+      outString = "Update Attempted.";
+    }
+
+    delete res;
+    delete stmt;
+    delete con;
+
+  } catch (sql::SQLException &e) {
+    outString = "MYSQL ERR: INVALID SYNTAX";
+  }
+
+  return outString;
 }

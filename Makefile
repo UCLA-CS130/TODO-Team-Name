@@ -1,7 +1,7 @@
 # Building the server
 CXXFLAGS=-std=c++11 -Wall 
 SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
-SQL_FLAGS=-I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
+SQL_FLAGS=-I/usr/include/cppconn -L/usr/lib -lmysqlcppconn -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
 
 
 # Running unit tests
@@ -40,7 +40,7 @@ docker:
 	cd deploy && tar -xvf binary.tar
 	rm -f deploy/binary.tar
 	docker build -t httpserver deploy
-	docker run --rm -t -p 8080:8080 httpserver
+	docker run --net=host --rm -t -p 8080:8080 httpserver
 
 aws:
 	./aws_deploy.sh

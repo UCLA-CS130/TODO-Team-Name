@@ -19,6 +19,8 @@ public:
   	Status HandleRequest(const Request& request, Response* response) override;
 private:
 	std::string root_;
+
+	bool url_decode(const std::string& in, std::string& out);
 };
 
 } // namespace server
