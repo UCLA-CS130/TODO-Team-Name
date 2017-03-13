@@ -1,6 +1,6 @@
 # Building the server
 CXXFLAGS=-std=c++11 -Wall 
-SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
+SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 SQL_FLAGS=-I/usr/include/cppconn -L/usr/lib -lmysqlcppconn -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
 
 # Running unit tests
