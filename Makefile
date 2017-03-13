@@ -1,6 +1,7 @@
 # Building the server
-CXXFLAGS=-std=c++11 -Wall -Werror
-SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
+CXXFLAGS=-std=c++11 -Wall 
+SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
+SQL_FLAGS=-I/usr/include/cppconn -L/usr/lib -lmysqlcppconn -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
 
 # Running unit tests
 GTEST_PATH=nginx-configparser/googletest/googletest
@@ -31,7 +32,7 @@ PROXY_HANDLER_DEPENDENCIES=src/request_handler_proxy.cpp src/request_handler.cpp
 all: webserver
 
 webserver: $(SRC_FILES)
-	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
+	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS) $(SQL_FLAGS)
 
 docker:
 	rm -f deploy/webserver
@@ -40,7 +41,7 @@ docker:
 	cd deploy && tar -xvf binary.tar
 	rm -f deploy/binary.tar
 	docker build -t httpserver deploy
-	docker run --rm -t -p 8080:8080 httpserver
+	docker run --net=host --rm -t -p 8080:8080 httpserver
 
 aws:
 	./aws_deploy.sh

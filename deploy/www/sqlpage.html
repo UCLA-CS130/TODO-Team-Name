@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>MySQL Database Interface</title>
+    <meta charset="utf-8">
+    <style>
+      body {
+        background: #eee;
+        font-family: Helvetica;
+        color: #333;
+      }
+      h1 {
+        margin-top: 0;
+      }
+      h2 {
+        color: #2980b9;
+      }
+      .main {
+        padding: 20px;
+        margin: 20px auto;
+        width: 70%;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="main">
+
+      <h1>Database Interface</h1>
+
+      <h2>Query</h2>
+      <p> <b>Ex.</b> SELECT name FROM Team </p> 
+
+      <form role="form" action="/sql/query" method="GET"
+      <form action="/sql/query" method="GET">
+        <div class="form-group">
+          <label for="q">Query</label>
+          <input type="text" id="q" name="q" placeholder="Search" autocomplete="off">
+        </div> 
+        <input type="submit" value="Search">
+      </form>
+
+      <h2>Update/Insert/Delete</h2>
+      <p> <b>Ex.</b> INSERT INTO Team (name) VALUES ("YourName") </p> 
+
+      <form role="form" action="/sql/update" method="GET"
+      <form action="/sql/update" method="GET">
+        <div class="form-group">
+          <label for="q">Update</label>
+          <input type="text" id="q" name="q" placeholder="Search" autocomplete="off">
+        </div> 
+        <input type="submit" value="Search">
+      </form>
