@@ -1,3 +1,8 @@
+//
+// sql_engine.cpp
+// ~~~~~~~~~~~~~~~~~~~
+//
+
 #include <iostream>
 #include "sql_engine.hpp"
 #include <stdlib.h>
@@ -8,10 +13,10 @@
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
 #include <resultset_metadata.h>
-
  
 std::string SqlEngine::HandleRequest(std::string& field, int mode) {
   std::string out_string = "";
+
   try {
     sql::Driver *driver;
     sql::Connection *con;
@@ -64,7 +69,8 @@ std::string SqlEngine::HandleRequest(std::string& field, int mode) {
     delete stmt;
     delete con;
 
-  } catch (sql::SQLException &e) {
+  }
+  catch (sql::SQLException &e) {
     out_string = "MYSQL ERR: INVALID SYNTAX";
   }
 

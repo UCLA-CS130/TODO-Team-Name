@@ -12,6 +12,7 @@
 #include "mime_types.hpp"
 #include "response.hpp"
 #include "request.hpp"
+#include "../cpp-markdown/markdown.h"
 
 namespace http {
 namespace server {
@@ -80,6 +81,16 @@ RequestHandler::Status StaticHandler::HandleRequest(const Request& request, Resp
   while (is.read(buf, sizeof(buf)).gcount() > 0) {
     file_content.append(buf, is.gcount());
   }
+
+  // Convert markdown files to HTML
+  if (extension == "md") {
+    markdown::Document doc;
+    doc.read(file_content);
+    std::ostringstream stream;
+    doc.write(stream);
+    file_content = stream.str();
+  }
+
   response->SetBody(file_content);
   response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
   response->AddHeader("Content-Type", mime_types::extension_to_type(extension));

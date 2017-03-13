@@ -44,18 +44,19 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
     std::string query_request = "query?q=";
     std::string update_request = "update?q=";
 
-    //parse request url
+    // Parse request url.
     std::string request_string = request.ToString();
     std::string q_field = "";
 
     request_string = request_string.substr(0, request_string.find("HTTP/1.1"));
+
     // Check for query.
     std::cout << "request_string: " << request_string << "\n";
     std::size_t found_query = request_string.find(query_request);
-    if (found_query != std::string::npos){
+    if (found_query != std::string::npos) {
         std::string request_substr = request_string.substr(request_string.find(query_request) + query_request.length());
-        std::string qField_d = request_substr.substr(0, request_substr.find(" ", 0));
-        url_decode(qField_d, q_field);
+        std::string q_field_d = request_substr.substr(0, request_substr.find(" ", 0));
+        url_decode(q_field_d, q_field);
         SQL_MODE = 1;
     }
 
@@ -63,8 +64,8 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
     std::size_t found_update = request_string.find(update_request);
     if (found_update != std::string::npos){
         std::string request_substr = request_string.substr(request_string.find(update_request) + update_request.length());
-        std::string qField_d = request_substr.substr(0, request_substr.find(" ", 0));
-        url_decode(qField_d, q_field);
+        std::string q_field_d = request_substr.substr(0, request_substr.find(" ", 0));
+        url_decode(q_field_d, q_field);
         SQL_MODE = 2;
     }
 
