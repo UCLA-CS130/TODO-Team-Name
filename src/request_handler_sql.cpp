@@ -48,7 +48,10 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
     std::string request_string = request.ToString();
     std::string q_field = "";
 
+    request_string = request_string.substr(0, request_string.find("HTTP/1.1"));
+
     // Check for query.
+    std::cout << "request_string: " << request_string << "\n";
     std::size_t found_query = request_string.find(query_request);
     if (found_query != std::string::npos) {
         std::string request_substr = request_string.substr(request_string.find(query_request) + query_request.length());
@@ -77,7 +80,7 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
     }
 
     // Open the file to send back.
-    std::string full_path = root_ + "/sqlpage.html";
+    std::string full_path = "deploy/" + root_ + "/sqlpage.html";
     std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
     if (!is) {
         response->SetStatus(Response::NOT_FOUND);
@@ -86,7 +89,7 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
 
     // Fill out the response to be sent to the client.
     response->SetStatus(Response::OK);
-    char buf[512];
+    char buf[8192];
     std::string file_content = "";
     while (is.read(buf, sizeof(buf)).gcount() > 0) {
         file_content.append(buf, is.gcount());
