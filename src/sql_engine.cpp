@@ -33,13 +33,26 @@ std::string SqlEngine::HandleRequest(std::string& field, int mode) {
       sql::ResultSetMetaData *res_meta = res -> getMetaData();
       int columns = res_meta -> getColumnCount();
 
+      out_string += "<table>";
+
+      // Column attributes
+      out_string += "<tr>";
+      for (int i = 1; i <= columns; i++) {
+        out_string += "<th>" + res_meta->getColumnName(i) + "</th>"; 
+      }
+      out_string += "</tr>";
+
       // Loop for each row.
       while (res->next()) {
+        out_string += "<tr>";
         // Access column data by index, 1-indexed
         for (int i = 1; i <= columns; i++) {
-          out_string += res->getString(i) + ", ";
+          out_string += "<td>" + res->getString(i) + "</td>";
         }
+        out_string += "</tr>";
       }
+
+      out_string += "</table>";
       delete res;
     }
     // If it's an update, we don't need to return any results.
