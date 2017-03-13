@@ -81,7 +81,7 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
 	  }
 
 	// Open the file to send back.
-	  std::string full_path = "deploy/" + root_ + "/sqlpage.html";
+	  std::string full_path = root_ + "/sqlpage.html";
 	  std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
 	  if (!is) {
 	    response->SetStatus(Response::NOT_FOUND);
@@ -96,10 +96,10 @@ RequestHandler::Status SqlHandler::HandleRequest(const Request& request, Respons
 	    file_content.append(buf, is.gcount());
 	  }
 	  if (resString.length() != 0){
-	  	file_content.append("<h1>Results:</h1>");
+	  	file_content.append("<h2>Results:</h2>");
 	  }
 	  file_content.append(resString.c_str(), resString.length());
-	  std::string ender = "</body></html>";
+	  std::string ender = "</div></body></html>";
 	  file_content.append(ender.c_str(), ender.length());
 	  response->SetBody(file_content);
 	  response->AddHeader("Content-Length", boost::lexical_cast<std::string>(file_content.length()));
