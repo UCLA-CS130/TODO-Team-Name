@@ -7,26 +7,29 @@
 class SqlEngineTest : public ::testing::Test {
 protected:
     std::string HandleQuery(std::string query) {
-        return handler.HandleRequest(query, 0);
+        return handler.HandleRequest(query, 1);
     }
     std::string HandleUpdate(std::string update) {
-        return handler.HandleRequest(update, 1);
+        return handler.HandleRequest(update, 2);
     }
-    void recreate(){
-        handler.HandleRequest(dropTable, 1);
-        handler.HandleRequest(createTable, 1);
+    void create(){
+        handler.HandleRequest(createTable, 2);
+    }
+    void destroy(){
+        handler.HandleRequest(dropTable, 2);
     }
     SqlEngine handler;
     std::string dropTable = "DROP TABLE IF EXISTS Test";
-    std::string createTable = "CREATE TABLE Test(name)";
+    std::string createTable = "CREATE TABLE Test(name VARCHAR(20))";
 };
 
 TEST_F(SqlEngineTest, QueryTest) {
-    recreate();
-    HandleUpdate("INSERT INTO Test(name) VALUES(test)");
+    create();
+    HandleUpdate("INSERT INTO Test(name) VALUES(\"test\")");
     std::string queryString = "SELECT * FROM Test";
-    std::string expectedOutput = "test";
+    std::string expectedOutput = "<table><tr><th>name</th></tr><tr><td>test</td></tr></table>";
 	EXPECT_EQ(expectedOutput, HandleQuery(queryString));
+    destroy();
 }
 
 TEST_F(SqlEngineTest, EmptyQuery) {
@@ -35,10 +38,11 @@ TEST_F(SqlEngineTest, EmptyQuery) {
 }
 
 TEST_F(SqlEngineTest, UpdateTest) {
-    recreate();
-    std::string updateString = "INSERT INTO Test(name) VALUES(test)";
+    create();
+    std::string updateString = "INSERT INTO Test(name) VALUES(\"test\")";
     std::string expectedOutput = "Update Success!";
     EXPECT_EQ(expectedOutput, HandleUpdate(updateString));
+    destroy();
 }
 
 TEST_F(SqlEngineTest, EmptyUpdate) {
