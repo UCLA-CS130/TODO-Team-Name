@@ -1,6 +1,7 @@
 # Building the server
-CXXFLAGS=-std=c++11 -Wall -Werror
+CXXFLAGS=-std=c++11 -Wall 
 SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
+SQL_FLAGS=-I/usr/include/cppconn -L/usr/lib -lmysqlcppconn -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
 
 # Running unit tests
 GTEST_PATH=nginx-configparser/googletest/googletest
@@ -31,7 +32,7 @@ PROXY_HANDLER_DEPENDENCIES=src/request_handler_proxy.cpp src/request_handler.cpp
 all: webserver
 
 webserver: $(SRC_FILES)
-	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS)
+	g++ $(CXXFLAGS) -I. $(SRC_FILES) -o webserver $(BOOST_FLAGS) $(SQL_FLAGS)
 
 docker:
 	rm -f deploy/webserver
