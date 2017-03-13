@@ -3,7 +3,6 @@ CXXFLAGS=-std=c++11 -Wall
 SRC_FILES=src/*.cpp nginx-configparser/config_parser.cc
 SQL_FLAGS=-I/usr/include/cppconn -L/usr/lib -lmysqlcppconn -I/usr/include/mysql -DBIG_JOINS=1  -fno-strict-aliasing -g -DNDEBUG -L/usr/lib/x86_64-linux-gnu -lmysqlclient -lpthread -lz -lm -ldl -static
 
-
 # Running unit tests
 GTEST_PATH=nginx-configparser/googletest/googletest
 GMOCK_PATH=nginx-configparser/googletest/googlemock
@@ -17,10 +16,12 @@ RESULTS_COVERAGE_DIR=results-coverage
 
 # Test file dependencies
 REQUEST_HANDLER_ECHO_DEPENDENCIES=src/request_handler_echo.cpp src/response.cpp src/request.cpp src/request_parser.cpp src/request_handler.cpp
-REQUEST_HANDLER_STATIC_DEPENDENCIES=src/request_handler_static.cpp src/mime_types.cpp src/response.cpp src/request.cpp src/request_parser.cpp src/request_handler.cpp
+REQUEST_HANDLER_STATIC_DEPENDENCIES=src/request_handler_static.cpp src/mime_types.cpp src/response.cpp src/request.cpp src/request_parser.cpp \
+src/request_handler.cpp cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 REQUEST_HANDLER_NOTFOUND_DEPENDENCIES=src/request_handler_notfound.cpp src/response.cpp src/request.cpp src/request_parser.cpp src/request_handler.cpp
 SERVER_DEPENDENCIES=src/server.cpp src/connection.cpp src/connection_manager.cpp src/response.cpp src/request.cpp src/request_handler_static.cpp \
-src/request_handler_echo.cpp src/request_handler_notfound.cpp src/request_handler_status.cpp src/request_parser.cpp src/mime_types.cpp src/request_handler.cpp
+src/request_handler_echo.cpp src/request_handler_notfound.cpp src/request_handler_status.cpp src/request_parser.cpp src/mime_types.cpp \
+src/request_handler.cpp cpp-markdown/markdown.cpp cpp-markdown/markdown-tokens.cpp
 REQUEST_PARSER_DEPENDENCIES=src/request_parser.cpp
 RESPONSE_DEPENDENCIES=src/response.cpp
 REQUEST_DEPENDENCIES=src/request.cpp src/request_parser.cpp

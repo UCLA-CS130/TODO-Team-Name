@@ -3,3 +3,4 @@ webserver
 httpserver.tar
 webserver.pem
 deploy/webserver
+deploy/binary.tar
