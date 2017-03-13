@@ -85,7 +85,7 @@ test:
 	$(TEST_DIR)/request_handler_proxy_test.cpp $(PROXY_HANDLER_DEPENDENCIES) \
 	$(TEST_DIR)/libgtest.a -o request_handler_proxy_test $(BOOST_FLAGS)
 
-		g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
 	$(TEST_DIR)/sql_engine_test.cpp $(SQL_ENGINE_DEPENDENCIES) \
 	$(TEST_DIR)/libgtest.a -o sql_engine_test $(BOOST_FLAGS) $(SQL_FLAGS)
 
@@ -96,6 +96,14 @@ test:
 	#g++ $(CXXFLAGS) $(GTEST_IMPORT) $(GMOCK_IMPORT) \
 	#$(TEST_DIR)/connection_manager_test.cpp $(CONNECTION_DEPENDENCIES) \
 	#$(TEST_DIR)/libgtest.a -o connection_manager_test $(BOOST_FLAGS)
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/request_handler_sql_test.cpp $(REQUEST_HANDLER_SQL_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o request_handler_sql_test $(BOOST_FLAGS) $(SQL_FLAGS)
+
+	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
+	$(TEST_DIR)/sql_engine_test.cpp $(SQL_ENGINE_DEPENDENCIES) \
+	$(TEST_DIR)/libgtest.a -o sql_engine_test $(BOOST_FLAGS) $(SQL_FLAGS)
 
 coverage: CXXFLAGS+=-coverage
 coverage:
@@ -167,10 +175,5 @@ clean:
 
 dist:
 	tar -czvf webserver.tar.gz *
-
-sqltest:
-	g++ $(CXXFLAGS) $(GTEST_IMPORT) \
-	$(TEST_DIR)/request_handler_sql_test.cpp $(REQUEST_HANDLER_SQL_DEPENDENCIES) \
-	$(TEST_DIR)/libgtest.a -o request_handler_sql_test $(BOOST_FLAGS) $(SQL_FLAGS)
 
 .PHONY: all test clean
