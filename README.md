@@ -11,13 +11,17 @@ This code is an adapted version of the
 [HTTP server](http://www.boost.org/doc/libs/1_62_0/doc/html/boost_asio/examples/cpp11_examples.html)
 example.
 
-The server is currently deployed on AWS under the public IP *54.190.63.110*.
+The server is currently deployed on AWS under the public IP *54.190.63.110* and port 8080.
 Try out some of the following links!
 * Echo: [http://54.190.63.110:8080/echo](http://54.190.63.110:8080/echo)
 * Static HTML: [http://54.190.63.110:8080/static1/index.html](http://54.190.63.110:8080/static1/index.html)
 * Static image: [http://54.190.63.110:8080/static2/ducks.jpg](http://54.190.63.110:8080/static2/ducks.jpg)
 * Status: [http://54.190.63.110:8080/status](http://54.190.63.110:8080/status)
-* Proxy: [http://54.190.63.110:8080/](http://54.190.63.110:8080/)
+* SQL interface: [http://54.190.63.110:8080/sql](http://54.190.63.110:8080/sql)
+* Project 9 design doc: [http://54.190.63.110:8080/static1/design.md](http://54.190.63.110:8080/static1/design.md)
+
+(We currently don't have the proxy handler up on our AWS instance because there was a bug in the proxy handler
+implementation that was causing our server to crash when a favicon.ico was requested that didn't exist)
 
 ---
 
@@ -25,21 +29,18 @@ Try out some of the following links!
 * To build and run the webserver in docker, run `make docker`
 * To deploy the docker image to AWS and run it, run `make aws`
 * To SSH into the EC2 instance, run `ssh -i webserver.pem ec2-user@54.190.63.110`
+  (assumes you have the private key webserver.pem in the working directory)
 
 ---
 
 ### Usage - local development
-* Edit `config` to define the port on which you want the server to run.
+* Edit `deploy/config` to define the port on which you want the server to run.
 * Run `make` to build the source code
-* Run server using `./webserver config`
+* Run server using `./webserver deploy/config`
 
 The server can be accessed via a variety of methods:
-* Use your browser to view the resource (for example, `http://localhost:8080/`).
-* Use a curl request: `curl -i -s localhost:8080`
-
-To test the static file handler, you can try requesting some of the following resources (assuming the config file is kept the same):
-* `localhost:8080/static1/index.html`
-* `localhost:8080/static2/ducks.jpg`
+* Use your browser to view the resource (for example, `http://localhost:8080/echo`).
+* Use a curl request: `curl -i -s localhost:8080/echo`
 
 ---
 
